@@ -1,4 +1,4 @@
-import classnames from 'classnames'
+import classNames from 'classnames'
 import {useState, useEffect} from 'react'
 import {useSelector, useDispatch} from 'react-redux'
 import {CardInfoT} from 'types/cards'
@@ -8,6 +8,7 @@ import CARDS from 'server/cards'
 import {validateDeck} from 'server/utils'
 import css from './deck.module.css'
 import {getPlayerDeck} from 'logic/session/session-selectors'
+import Accordion from 'components/accordion'
 
 const TYPED_CARDS = CARDS as Record<string, CardInfoT>
 
@@ -88,6 +89,12 @@ const Deck = ({setMenuSection}: Props) => {
 			payload: pickedCards.map((card) => card.cardId),
 		})
 		setMenuSection('mainmenu')
+	}
+
+	//TODO: Not working yet...
+	const createNewDeck = () => {
+		console.log('CREATE NEW DECK')
+		setMenuSection('create-deck')
 	}
 
 	const loadSavedDecks = () => {
@@ -182,88 +189,264 @@ const Deck = ({setMenuSection}: Props) => {
 	const sortedAllCards = sortCards(allCards)
 	const sortedDeckCards = sortCards(pickedCards)
 
-	return (
-		<div className={css.deck}>
-			<div className={css.header}>
-				<button disabled={!!validationMessage} onClick={backToMenu}>
-					Back to menu
-				</button>
-				<div className={css.limits}>{validationMessage}</div>
-				<div className={css.dynamicSpace} />
-				<button onClick={clearDeck}>Clear</button>
-				<div>
-					<input
-						maxLength={25}
-						name="deckName"
-						placeholder="Deck Name..."
-						onBlur={(e) => {
-							setDeckName(e.target.value)
-						}}
-					/>
-					<button type="button" onClick={saveDeck}>
-						Save
-					</button>
+	const sampleDecks = [
+		{
+			id: 1,
+			image: '../images/types/type-redstone.png',
+			alt: 'redstone',
+			name: 'Redstone Deck',
+		},
+		{
+			id: 2,
+			image: '../images/types/type-prankster.png',
+			alt: 'prankster',
+			name: 'Obsidian Destroyer',
+		},
+		{
+			id: 3,
+			image: '../images/types/type-builder.png',
+			alt: 'builder',
+			name: 'Builders melt your face so much it hurts!',
+		},
+		{
+			id: 4,
+			image: '../images/types/type-farm.png',
+			alt: 'farm',
+			name: "Tango's Deck",
+		},
+		{
+			id: 5,
+			image: '../images/types/type-balanced.png',
+			alt: 'balanced',
+			name: 'Balanced Beauty',
+		},
+		{
+			id: 6,
+			image: '../images/types/type-prankster.png',
+			alt: 'prankster',
+			name: 'Mumbo Madness',
+		},
+		{
+			id: 7,
+			image: '../images/types/type-builder.png',
+			alt: 'builder',
+			name: 'Build',
+		},
+		{
+			id: 8,
+			image: '../images/types/type-explorer.png',
+			alt: 'farm',
+			name: 'Exploring these cards',
+		},
+		{
+			id: 9,
+			image: '../images/types/type-pvp.png',
+			alt: 'pvp',
+			name: '*Sword noises*',
+		},
+		{
+			id: 10,
+			image: '../images/types/type-terraform.png',
+			alt: 'prankster',
+			name: 'Future Gem Deck',
+		},
+		{
+			id: 11,
+			image: '../images/types/type-speedrunner.png',
+			alt: 'speedrunner',
+			name: 'Gotta go fast!',
+		},
+		{
+			id: 12,
+			image: '../images/types/type-miner.png',
+			alt: 'miner',
+			name: 'TFC only',
+		},
+	]
 
-					<select
-						className={css.deckSelection}
-						name="deckSelection"
-						id="deckSelection"
-						onChange={(e) => {
-							loadDeck(e.target.value)
-						}}
-					>
-						<option value="">Saved Decks</option>
-						{loadedDecks.map((d: string) => (
-							<option key={d} value={d}>
-								{d}
-							</option>
-						))}
-					</select>
-					<button
-						type="button"
-						onClick={() => {
-							deleteDeck(selectedDeck)
-						}}
-					>
-						Delete
-					</button>
+	console.log(loadedDecks)
+
+	return (
+		<>
+			<header>
+				<div className={css.headerElements}>
+					<img
+						src="../images/back_arrow.svg"
+						alt="back-arrow"
+						className={css.headerReturn}
+						onClick={() => setMenuSection('mainmenu')}
+					/>
+					<p className={css.title}>Deck Selection</p>
+				</div>
+			</header>
+
+			<div className={css.background} />
+			<div className={css.body}>
+				<div className={css.deckWrapper}>
+					{/* SELECTED DECK SECTION */}
+					<section className={css.deck}>
+						<div className={css.deckHeader}>
+							<div className={css.deckImage}>
+								<img src="../images/types/type-explorer.png" alt="explorer" />
+							</div>
+							<p>Explorer Controller</p>
+							<div className={css.dynamicSpace}></div>
+							<p className={css.cardCount}>
+								42/42 <span>Cards</span>
+							</p>
+							<button>
+								<img src="../images/edit-icon.svg" alt="edit" />
+							</button>
+							<button>
+								<img src="../images/delete-icon.svg" alt="delete" />
+							</button>
+						</div>
+
+						<div className={css.deckBody}>
+							<Accordion
+								title="Hermits"
+								count={sortedDeckCards.slice(0, 9).length}
+							>
+								<CardList
+									cards={sortedDeckCards.slice(0, 9)}
+									size="small"
+									wrap={true}
+								/>
+							</Accordion>
+							<Accordion
+								title="Effects"
+								count={sortedDeckCards.slice(10, 20).length}
+							>
+								<CardList
+									cards={sortedDeckCards.slice(10, 20)}
+									size="small"
+									wrap={true}
+								/>
+							</Accordion>
+							<Accordion
+								title="Items"
+								count={sortedDeckCards.slice(20, 42).length}
+							>
+								<CardList
+									cards={sortedDeckCards.slice(20, 42)}
+									size="small"
+									wrap={true}
+								/>
+							</Accordion>
+						</div>
+					</section>
+
+					{/* MY DECKS SECTION */}
+					<section className={css.myDecks}>
+						<div className={css.myDecksHeader}>
+							<img src="../images/card-icon.png" alt="card-icon" />
+							<p>My Decks</p>
+						</div>
+						<div className={css.myDecksBody}>
+							<ul className={css.myDecksList}>
+								{sampleDecks.map((scard) => (
+									<li className={css.myDecksItem} key={scard.id}>
+										<div className={css.deckImage}>
+											<img src={scard.image} alt={scard.alt} />
+										</div>
+										{scard.name}
+									</li>
+								))}
+							</ul>
+						</div>
+						<div className={css.newDeckButton} onClick={createNewDeck}>
+							<p>Create New Deck</p>
+						</div>
+					</section>
 				</div>
 			</div>
-			<div className={css.cards}>
-				<div className={classnames(css.cardColumn, css.allCards)}>
-					<div className={css.cardsTitle}>All cards</div>
-					<CardList
-						cards={sortedAllCards}
-						onClick={addCard}
-						size="small"
-						wrap={true}
-					/>
-				</div>
-				<div className={classnames(css.cardColumn, css.selectedCards)}>
-					<div className={css.cardsTitle}>
-						<span>Your deck ({pickedCards.length})</span>
-						<span> - </span>
-						<span className={css.commonAmount} title="Common">
-							{commonCards.length}
-						</span>
-						<span> </span>
-						<span className={css.rareAmount} title="Rare">
-							{rareCards.length}
-						</span>
-						<span> </span>
-						<span className={css.ultraRareAmount} title="Ultra rare">
-							{ultraRareCards.length}
-						</span>
+
+			{/* HIDING ALL THE OLD STUFF SO I CAN EASILY REFERENCE IT */}
+			<div className={css.Hidden}>
+				<div className={css.deck}>
+					<div className={css.header}>
+						<button disabled={!!validationMessage} onClick={backToMenu}>
+							Back to menu
+						</button>
+						<div className={css.limits}>{validationMessage}</div>
+						<div className={css.dynamicSpace} />
+						<button onClick={clearDeck}>Clear</button>
+						<div>
+							<input
+								maxLength={25}
+								name="deckName"
+								placeholder="Deck Name..."
+								onBlur={(e) => {
+									setDeckName(e.target.value)
+								}}
+							/>
+							<button type="button" onClick={saveDeck}>
+								Save
+							</button>
+
+							<select
+								className={css.deckSelection}
+								name="deckSelection"
+								id="deckSelection"
+								onChange={(e) => {
+									loadDeck(e.target.value)
+								}}
+							>
+								<option value="">Saved Decks</option>
+								{loadedDecks.map((d: string) => (
+									<option key={d} value={d}>
+										{d}
+									</option>
+								))}
+							</select>
+							<button
+								type="button"
+								onClick={() => {
+									deleteDeck(selectedDeck)
+								}}
+							>
+								Delete
+							</button>
+						</div>
 					</div>
-					<CardList
-						cards={sortedDeckCards}
-						onClick={removeCard}
-						size="small"
-						wrap={true}
-					/>
+
+					<div className={css.cards}>
+						<div className={classNames(css.cardColumn, css.allCards)}>
+							<div className={css.cardsTitle}>All cards</div>
+							<CardList
+								cards={sortedAllCards}
+								onClick={addCard}
+								size="small"
+								wrap={true}
+							/>
+						</div>
+						<div className={classNames(css.cardColumn, css.selectedCards)}>
+							<div className={css.cardsTitle}>
+								<span>Your deck ({pickedCards.length})</span>
+								<span> - </span>
+								<span className={css.commonAmount} title="Common">
+									{commonCards.length}
+								</span>
+								<span> </span>
+								<span className={css.rareAmount} title="Rare">
+									{rareCards.length}
+								</span>
+								<span> </span>
+								<span className={css.ultraRareAmount} title="Ultra rare">
+									{ultraRareCards.length}
+								</span>
+							</div>
+							<CardList
+								cards={sortedDeckCards}
+								onClick={removeCard}
+								size="small"
+								wrap={true}
+							/>
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	)
 }
 
