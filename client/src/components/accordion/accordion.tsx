@@ -19,13 +19,14 @@ function Accordion({children, title, count}: Props) {
 				<h3>
 					{title} <span>({count})</span>
 				</h3>
-				<img src="../images/caret-down.svg" alt="caret-down" />
+				<img
+					src="../images/caret-down.svg"
+					alt="caret-down"
+					style={isActive ? {} : {transform: 'rotate(-180deg)'}}
+				/>
 			</div>
 			<div
-				className={classnames(
-					css.accordionContent,
-					isActive ? null : css.hideAccordion
-				)}
+				className={classnames(css.accordionContent, isActive ? null : css.hide)}
 			>
 				{children}
 			</div>

@@ -56,6 +56,8 @@ const Deck = ({setMenuSection}: Props) => {
 
 	const [loadedDecks, setLoadedDecks] = useState<any>([])
 
+	const [myDecksOpen, setMyDecksOpen] = useState<boolean>(true)
+
 	const commonCards = pickedCards.filter(
 		(card) => TYPED_CARDS[card.cardId].rarity === 'common'
 	)
@@ -262,9 +264,61 @@ const Deck = ({setMenuSection}: Props) => {
 			alt: 'miner',
 			name: 'TFC only',
 		},
+		{
+			id: 21,
+			image: '../images/types/type-redstone.png',
+			alt: 'redstone',
+			name: 'Redstone Deck',
+		},
+		{
+			id: 22,
+			image: '../images/types/type-prankster.png',
+			alt: 'prankster',
+			name: 'Obsidian Destroyer',
+		},
+		{
+			id: 23,
+			image: '../images/types/type-builder.png',
+			alt: 'builder',
+			name: 'This is a super long deck nameie',
+		},
+		{
+			id: 24,
+			image: '../images/types/type-farm.png',
+			alt: 'farm',
+			name: "Tango's Deck",
+		},
+		{
+			id: 25,
+			image: '../images/types/type-balanced.png',
+			alt: 'balanced',
+			name: 'Balanced Beauty',
+		},
+		{
+			id: 26,
+			image: '../images/types/type-prankster.png',
+			alt: 'prankster',
+			name: 'Mumbo Madness',
+		},
+		{
+			id: 27,
+			image: '../images/types/type-builder.png',
+			alt: 'builder',
+			name: 'Build',
+		},
+		{
+			id: 28,
+			image: '../images/types/type-explorer.png',
+			alt: 'farm',
+			name: 'Exploring these cards',
+		},
+		{
+			id: 29,
+			image: '../images/types/type-pvp.png',
+			alt: 'pvp',
+			name: '*Sword noises*',
+		},
 	]
-
-	console.log(loadedDecks)
 
 	return (
 		<>
@@ -283,13 +337,57 @@ const Deck = ({setMenuSection}: Props) => {
 			<div className={css.background} />
 			<div className={css.body}>
 				<div className={css.deckWrapper}>
+					{/* MOBILE DECK SELECTION SECTION */}
+					<section className={css.mobileDeckSelect}>
+						{/* Header */}
+						<div
+							className={css.myDecksHeader}
+							onClick={() => setMyDecksOpen(!myDecksOpen)}
+						>
+							<img src="../images/card-icon.png" alt="card-icon" />
+							<p>My Decks</p>
+						</div>
+
+						{/* Content */}
+						<div
+							className={classNames(
+								css.mobileDeckContent,
+								myDecksOpen ? css.hide : null
+							)}
+						>
+							{/* Deck list */}
+							<ul className={css.mobileDeckList}>
+								{sampleDecks.map((scard) => (
+									<li
+										className={css.myDecksItem}
+										key={scard.id}
+										onClick={() => {
+											setMyDecksOpen(!myDecksOpen)
+											console.log(scard)
+										}}
+									>
+										<div className={css.deckImage}>
+											<img src={scard.image} alt={scard.alt} />
+										</div>
+										{scard.name}
+									</li>
+								))}
+							</ul>
+
+							{/* Create button */}
+							<div className={css.newDeckButton} onClick={createNewDeck}>
+								<p>Create New Deck</p>
+							</div>
+						</div>
+					</section>
+
 					{/* SELECTED DECK SECTION */}
 					<section className={css.deck}>
 						<div className={css.deckHeader}>
 							<div className={css.deckImage}>
 								<img src="../images/types/type-explorer.png" alt="explorer" />
 							</div>
-							<p>Explorer Controller</p>
+							<p>Char limit 32</p>
 							<div className={css.dynamicSpace}></div>
 							<p className={css.cardCount}>
 								42/42 <span>Cards</span>
@@ -303,36 +401,38 @@ const Deck = ({setMenuSection}: Props) => {
 						</div>
 
 						<div className={css.deckBody}>
-							<Accordion
-								title="Hermits"
-								count={sortedDeckCards.slice(0, 9).length}
-							>
-								<CardList
-									cards={sortedDeckCards.slice(0, 9)}
-									size="small"
-									wrap={true}
-								/>
-							</Accordion>
-							<Accordion
-								title="Effects"
-								count={sortedDeckCards.slice(10, 20).length}
-							>
-								<CardList
-									cards={sortedDeckCards.slice(10, 20)}
-									size="small"
-									wrap={true}
-								/>
-							</Accordion>
-							<Accordion
-								title="Items"
-								count={sortedDeckCards.slice(20, 42).length}
-							>
-								<CardList
-									cards={sortedDeckCards.slice(20, 42)}
-									size="small"
-									wrap={true}
-								/>
-							</Accordion>
+							<div className={css.deckScroll}>
+								<Accordion
+									title="Hermits"
+									count={sortedDeckCards.slice(0, 9).length}
+								>
+									<CardList
+										cards={sortedDeckCards.slice(0, 9)}
+										size="small"
+										wrap={true}
+									/>
+								</Accordion>
+								<Accordion
+									title="Effects"
+									count={sortedDeckCards.slice(10, 20).length}
+								>
+									<CardList
+										cards={sortedDeckCards.slice(10, 20)}
+										size="small"
+										wrap={true}
+									/>
+								</Accordion>
+								<Accordion
+									title="Items"
+									count={sortedDeckCards.slice(20, 42).length}
+								>
+									<CardList
+										cards={sortedDeckCards.slice(20, 42)}
+										size="small"
+										wrap={true}
+									/>
+								</Accordion>
+							</div>
 						</div>
 					</section>
 
@@ -342,18 +442,18 @@ const Deck = ({setMenuSection}: Props) => {
 							<img src="../images/card-icon.png" alt="card-icon" />
 							<p>My Decks</p>
 						</div>
-						<div className={css.myDecksBody}>
-							<ul className={css.myDecksList}>
-								{sampleDecks.map((scard) => (
-									<li className={css.myDecksItem} key={scard.id}>
-										<div className={css.deckImage}>
-											<img src={scard.image} alt={scard.alt} />
-										</div>
-										{scard.name}
-									</li>
-								))}
-							</ul>
-						</div>
+
+						<ul className={css.myDecksList}>
+							{sampleDecks.map((scard) => (
+								<li className={css.myDecksItem} key={scard.id}>
+									<div className={css.deckImage}>
+										<img src={scard.image} alt={scard.alt} />
+									</div>
+									{scard.name}
+								</li>
+							))}
+						</ul>
+
 						<div className={css.newDeckButton} onClick={createNewDeck}>
 							<p>Create New Deck</p>
 						</div>
@@ -362,7 +462,7 @@ const Deck = ({setMenuSection}: Props) => {
 			</div>
 
 			{/* HIDING ALL THE OLD STUFF SO I CAN EASILY REFERENCE IT */}
-			<div className={css.Hidden}>
+			<div className={css.hide}>
 				<div className={css.deck}>
 					<div className={css.header}>
 						<button disabled={!!validationMessage} onClick={backToMenu}>
