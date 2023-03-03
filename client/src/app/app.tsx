@@ -6,9 +6,10 @@ import {getStatus} from 'logic/matchmaking/matchmaking-selectors'
 import LostConnection from 'components/lost-connection'
 import {getSocketStatus} from 'logic/socket/socket-selectors'
 import Login from './login'
-import MainMenu from './main-menu'
 import Game from './game'
+import MainMenu from './main-menu'
 import Deck from './deck'
+import CreateDeck from './create-deck'
 import MatchMaking from './match-making'
 import css from './app.module.css'
 
@@ -25,11 +26,22 @@ function App() {
 		} else if (matchmakingStatus) {
 			return <MatchMaking />
 		} else if (playerName) {
-			return menuSection === 'deck' ? (
-				<Deck setMenuSection={setMenuSection} />
-			) : (
-				<MainMenu setMenuSection={setMenuSection} />
-			)
+			switch (menuSection) {
+				case 'deck':
+					return <Deck setMenuSection={setMenuSection} />
+					break
+				case 'create-deck':
+					return <CreateDeck setMenuSection={setMenuSection} />
+					break
+				default:
+					return <MainMenu setMenuSection={setMenuSection} />
+			}
+
+			// return menuSection === 'deck' ? (
+			// 	<Deck setMenuSection={setMenuSection} />
+			// ) : (
+			// 	<MainMenu setMenuSection={setMenuSection} />
+			// )
 		}
 		return <Login />
 	}

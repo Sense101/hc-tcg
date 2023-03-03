@@ -95,7 +95,6 @@ const Deck = ({setMenuSection}: Props) => {
 
 	//TODO: Not working yet...
 	const createNewDeck = () => {
-		console.log('CREATE NEW DECK')
 		setMenuSection('create-deck')
 	}
 
