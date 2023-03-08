@@ -1,3 +1,5 @@
+import {PlayerDeckT} from 'types/deck'
+
 export const login = (playerName: string) => ({
 	type: 'LOGIN',
 	payload: playerName,
@@ -7,7 +9,7 @@ type PlayerInfo = {
 	playerId: string
 	playerName: string
 	playerSecret: string
-	playerDeck?: Array<string>
+	playerDeck: PlayerDeckT
 }
 
 export const setPlayerInfo = (playerInfo: PlayerInfo) => ({

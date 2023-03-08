@@ -36,12 +36,6 @@ function App() {
 				default:
 					return <MainMenu setMenuSection={setMenuSection} />
 			}
-
-			// return menuSection === 'deck' ? (
-			// 	<Deck setMenuSection={setMenuSection} />
-			// ) : (
-			// 	<MainMenu setMenuSection={setMenuSection} />
-			// )
 		}
 		return <Login />
 	}

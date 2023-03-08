@@ -23,8 +23,15 @@ export class Player {
 		/** @type {string} */
 		this.playerSecret = Math.random().toString()
 
-		/** @type {Array<string>} */
-		this.playerDeck = getStarterPack()
+		// /** @type {Array<string>} */
+		// this.playerDeck = getStarterPack()
+
+		/** @type {object{name: string, icon: string, cards: Array<string>}} */
+		this.playerDeck = {
+			name: 'Default',
+			icon: 'any',
+			cards: getStarterPack(),
+		}
 
 		/** @type {string} */
 		this.playerName = playerName

@@ -115,6 +115,8 @@ header {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
+	height: 100%;
+	width: 100%;
 	max-width: 80rem;
 	align-items: stretch;
 	overflow: hidden;
@@ -122,6 +124,7 @@ header {
 
 .deck {
 	display: flex;
+	justify-items: stretch;
 	flex-direction: column;
 	background: #48494a;
 	width: 100%;
@@ -136,11 +139,16 @@ header {
 	align-items: center;
 	justify-content: flex-start;
 	min-height: 3rem;
-	font-family: Minecrafter;
 	background-color: #373737;
 	gap: 0.5rem;
 	padding: 0 1rem;
 	filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
+	z-index: 1;
+}
+
+.deckName {
+	filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.35));
+	font-family: Minecrafter;
 }
 
 .deckBody {
@@ -148,6 +156,17 @@ header {
 	flex: 0 1 auto;
 	overflow-y: scroll;
 	padding: 1rem;
+}
+
+.validationMessage {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0.5rem;
+	margin-bottom: 0.5rem;
+	border: 1px solid grey;
+	background: rgb(249, 168, 3);
+	filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.35));
 }
 
 .cardCount {
@@ -205,12 +224,27 @@ header {
 	align-items: center;
 	padding: 0.5rem;
 	user-select: none;
+	/* transition: color 0.5s ease-in-out, font-size 0.5s ease-in-out; */
 }
 
 .myDecksItem:hover {
 	cursor: pointer;
 	background: #48494a;
 	box-shadow: inset 0px -2px #5a5b5c, inset 0px 2px #2b2c2c;
+}
+
+.selectedDeck {
+	font-size: 1rem;
+	/* font-weight: 700; */
+	color: gold;
+	text-indent: 3px;
+	/* background: #48494a; */
+	background: linear-gradient(
+		to right,
+		rgba(49, 50, 51, 0),
+		rgba(28, 29, 29, 0.4)
+	);
+	transition: all 0.25s ease-in-out;
 }
 
 .newDeckButton {
@@ -334,6 +368,10 @@ header {
 .deckSelection {
 	margin: 0 4px 0 20px;
 	min-width: 160px;
+}
+
+.error {
+	color: red;
 }
 
 .hide {

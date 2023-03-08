@@ -1,10 +1,11 @@
 import {AnyAction} from 'redux'
+import {PlayerDeckT} from 'types/deck'
 
 type SessionState = {
 	playerName: string
 	playerId: string
 	playerSecret: string
-	playerDeck: Array<string>
+	playerDeck: PlayerDeckT
 	connecting: boolean
 }
 
@@ -12,7 +13,7 @@ const defaultState: SessionState = {
 	playerName: '',
 	playerId: '',
 	playerSecret: '',
-	playerDeck: [],
+	playerDeck: {name: 'Default', icon: 'any', cards: []},
 	connecting: false,
 }
 
@@ -30,7 +31,11 @@ const loginReducer = (
 				playerName: '',
 				playerId: '',
 				playerSecret: '',
-				playerDeck: [],
+				playerDeck: {
+					name: 'Default',
+					icon: 'any',
+					cards: [],
+				},
 			}
 		case 'SET_PLAYER_INFO':
 			return {

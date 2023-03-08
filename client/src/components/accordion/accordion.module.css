@@ -18,6 +18,11 @@
 	font-weight: 400;
 }
 
+.accordionHeader > h3 > span {
+	font-size: 0.9rem;
+	font-weight: 400;
+}
+
 .accordionHeader > img {
 	height: 8px;
 	width: 8px;

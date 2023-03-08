@@ -68,4 +68,10 @@ export type HermitCardT = AnyCardT & {
 	secondary: HermitAttackT
 }
 
+export type RarityT = {
+	common: number
+	rare: number
+	ultra_rare: number
+}
+
 export type CardInfoT = ItemCardT | EffectCardT | HermitCardT | HealthCardT

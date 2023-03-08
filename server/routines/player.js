@@ -69,20 +69,19 @@ function* playerDisconnectedSaga(action) {
 }
 
 function* updateDeckSaga(action) {
-	const {playerId} = action
-	let newDeck = action.payload
-	const player = root.players[playerId]
-	if (!player) return
-	if (!newDeck || !Array.isArray(newDeck)) return
-	newDeck = newDeck.filter((cardId) => cardId in CARDS)
+	const player = root.players[action.playerId]
+	const deck = action.payload.cards
+	const validationMessage = validateDeck(deck)
 
-	const validationMessage = validateDeck(newDeck)
+	if (!player) return
+	if (!deck || !Array.isArray(deck)) return
 	if (validationMessage) return
-	player.playerDeck = newDeck
+
+	player.playerDeck = action.payload
 
 	player.socket?.emit('NEW_DECK', {
 		type: 'NEW_DECK',
-		payload: newDeck,
+		payload: player.playerDeck,
 	})
 }
 

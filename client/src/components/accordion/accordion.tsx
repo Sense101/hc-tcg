@@ -1,14 +1,16 @@
 import classnames from 'classnames'
 import React, {useState} from 'react'
 import css from './accordion.module.css'
+import {RarityT} from 'types/cards'
 
 type Props = {
 	children: React.ReactNode
 	title?: string
 	count: number
+	rarity?: RarityT
 }
 
-function Accordion({children, title, count}: Props) {
+function Accordion({children, title, count, rarity}: Props) {
 	const [isActive, setIsActive] = useState<boolean>(true)
 	return (
 		<div className={css.accordion}>
@@ -17,7 +19,10 @@ function Accordion({children, title, count}: Props) {
 				onClick={() => setIsActive(!isActive)}
 			>
 				<h3>
-					{title} <span>({count})</span>
+					{title}{' '}
+					<span>
+						({count}) - {rarity?.common}, {rarity?.rare}, {rarity?.ultra_rare}
+					</span>
 				</h3>
 				<img
 					src="../images/caret-down.svg"
