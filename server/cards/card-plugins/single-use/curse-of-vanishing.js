@@ -1,6 +1,10 @@
 import SingleUseCard from './_single-use-card'
 import {discardCard} from '../../../utils'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 class CurseOfVanishingSingleUseCard extends SingleUseCard {
 	constructor() {
 		super({
@@ -15,9 +19,13 @@ class CurseOfVanishingSingleUseCard extends SingleUseCard {
 			{target: 'opponent', type: 'effect', amount: 1, active: true},
 		]
 	}
+
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
-		game.hooks.applyEffect.tap(this.id, (action, derivedState) => {
-			const {singleUseInfo, opponentPlayer} = derivedState
+		game.hooks.applyEffect.tap(this.id, () => {
+			const {singleUseInfo, opponentPlayer} = game.ds
 
 			if (singleUseInfo?.id === this.id) {
 				const activeRow = opponentPlayer.board.activeRow

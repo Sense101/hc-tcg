@@ -7,7 +7,6 @@
 	dominant-baseline: hanging;
 	text-anchor: middle;
 	fill: white;
-	font-weight: bold;
 	letter-spacing: 8px;
 }
 
@@ -23,6 +22,6 @@
 	fill: rgb(226, 202, 139);
 }
 
-.icon {
-	filter: url("#drop-shadow");
-}
+/* .icon {
+	filter: url('#drop-shadow');
+} */

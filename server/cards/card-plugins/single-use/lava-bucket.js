@@ -1,6 +1,10 @@
 import SingleUseCard from './_single-use-card'
 import {discardCard} from '../../../utils'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 class LavaBucketSingleUseCard extends SingleUseCard {
 	constructor() {
 		super({
@@ -15,10 +19,13 @@ class LavaBucketSingleUseCard extends SingleUseCard {
 			{target: 'opponent', type: 'hermit', amount: 1, active: true},
 		]
 	}
+
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
-		game.hooks.applyEffect.tap(this.id, (action, derivedState) => {
-			const {singleUseInfo, opponentActiveRow, opponentEffectCardInfo} =
-				derivedState
+		game.hooks.applyEffect.tap(this.id, () => {
+			const {singleUseInfo, opponentActiveRow, opponentEffectCardInfo} = game.ds
 			if (singleUseInfo?.id === this.id) {
 				if (opponentActiveRow === null) return 'INVALID'
 				if (opponentEffectCardInfo?.id !== 'water_bucket') {

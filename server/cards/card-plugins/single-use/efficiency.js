@@ -1,5 +1,9 @@
 import SingleUseCard from './_single-use-card'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 class EfficiencySingleUseCard extends SingleUseCard {
 	constructor() {
 		super({
@@ -12,11 +16,15 @@ class EfficiencySingleUseCard extends SingleUseCard {
 
 		this.useReqs = [{target: 'player', type: 'hermit', amount: 1, active: true}]
 	}
+
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
 		game.hooks.availableActions.tap(
 			this.id,
-			(availableActions, derivedState) => {
-				const {pastTurnActions, currentPlayer} = derivedState
+			(availableActions, pastTurnActions) => {
+				const {currentPlayer} = game.ds
 				const suId = currentPlayer.board.singleUseCard?.cardId
 				const suUsed = currentPlayer.board.singleUseCardUsed
 				if (suId === this.id && suUsed) {
@@ -38,8 +46,8 @@ class EfficiencySingleUseCard extends SingleUseCard {
 			}
 		)
 
-		game.hooks.applyEffect.tap(this.id, (action, derivedState) => {
-			const {singleUseInfo} = derivedState
+		game.hooks.applyEffect.tap(this.id, () => {
+			const {singleUseInfo} = game.ds
 			if (singleUseInfo?.id === this.id) {
 				return 'DONE'
 			}

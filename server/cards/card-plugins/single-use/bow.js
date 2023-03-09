@@ -1,5 +1,9 @@
 import SingleUseCard from './_single-use-card'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 class BowSingleUseCard extends SingleUseCard {
 	constructor() {
 		super({
@@ -16,9 +20,14 @@ class BowSingleUseCard extends SingleUseCard {
 		]
 		this.pickReqs = this.useReqs
 	}
+
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
-		game.hooks.attack.tap(this.id, (target, turnAction, derivedState) => {
-			const {singleUseInfo, pickedCardsInfo} = derivedState
+		game.hooks.attack.tap(this.id, (target, turnAction, attackState) => {
+			const {singleUseInfo} = game.ds
+			const {pickedCardsInfo} = attackState
 			if (singleUseInfo?.id !== this.id) return
 			if (target.isActive) return
 

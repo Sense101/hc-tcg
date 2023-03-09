@@ -14,6 +14,10 @@ export const getGameState = (state: RootState): GameState | null => {
 	return getGame(state).gameState
 }
 
+export const getTime = (state: RootState) => {
+	return getGame(state).time
+}
+
 export const getPlayerStates = (state: RootState) => {
 	return getGameState(state)?.players || null
 }
@@ -36,6 +40,15 @@ export const getCurrentPlayerState = (state: RootState) => {
 	const gameState = getGameState(state)
 	if (!gameState) return null
 	return getPlayerStateById(gameState.turnPlayerId)(state)
+}
+
+export const getInactivePlayerState = (state: RootState) => {
+	const gameState = getGameState(state)
+	if (!gameState) return null
+	const turnPlayerId = gameState.turnPlayerId
+	const inactiveId = gameState.order.filter((id) => id !== turnPlayerId)[0]
+	if (!inactiveId) return null
+	return getPlayerStateById(inactiveId)(state)
 }
 
 export const getAvailableActions = (state: RootState) => {
@@ -64,4 +77,8 @@ export const getChatMessages = (state: RootState) => {
 
 export const getCurrentCoinFlip = (state: RootState) => {
 	return getGame(state).currentCoinFlip
+}
+
+export const getOppopnentConnection = (state: RootState) => {
+	return getGame(state).opponentConnected
 }

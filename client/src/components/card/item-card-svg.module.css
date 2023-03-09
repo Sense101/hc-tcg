@@ -7,7 +7,6 @@
 	dominant-baseline: hanging;
 	text-anchor: middle;
 	fill: black;
-	font-weight: bold;
 	letter-spacing: 8px;
 }
 
@@ -70,12 +69,7 @@
 .x2 {
 	font-size: 55px;
 }
-
+/* 
 .icon {
-	/* css filter method, commented out for future reference */
-	/* filter: drop-shadow(5px 5px 0 white)
-        drop-shadow(-5px 5px 0 white)
-        drop-shadow(5px -5px 0 white)
-        drop-shadow(-5px -5px 0 white) */
 	filter: url("#drop-shadow");
-}
+} */

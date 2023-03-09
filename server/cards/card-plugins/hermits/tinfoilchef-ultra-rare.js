@@ -1,6 +1,10 @@
 import HermitCard from './_hermit-card'
 import {flipCoin, discardCard} from '../../../utils'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 class TinFoilChefUltraRareHermitCard extends HermitCard {
 	constructor() {
 		super({
@@ -25,15 +29,18 @@ class TinFoilChefUltraRareHermitCard extends HermitCard {
 		})
 	}
 
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
-		game.hooks.attack.tap(this.id, (target, turnAction, derivedState) => {
-			const {attackerHermitCard, typeAction, currentPlayer, opponentActiveRow} =
-				derivedState
+		game.hooks.attack.tap(this.id, (target, turnAction, attackState) => {
+			const {currentPlayer, opponentActiveRow} = game.ds
+			const {moveRef, typeAction} = attackState
 
 			if (typeAction !== 'SECONDARY_ATTACK') return target
 			if (!target.isActive) return target
-			if (attackerHermitCard.cardId !== this.id) return target
-			if (!opponentActiveRow.effectCard) return target
+			if (moveRef.hermitCard.cardId !== this.id) return target
+			if (!opponentActiveRow || !opponentActiveRow.effectCard) return target
 
 			// can't discard two items on the same hermit
 			const limit = currentPlayer.custom[this.id] || {}

@@ -1,6 +1,10 @@
 import SingleUseCard from './_single-use-card'
 import {flipCoin} from '../../../utils'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 class LootingSingleUseCard extends SingleUseCard {
 	constructor() {
 		super({
@@ -15,9 +19,12 @@ class LootingSingleUseCard extends SingleUseCard {
 		this.pickReqs = this.useReqs
 	}
 
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
-		game.hooks.applyEffect.tap(this.id, (action, derivedState) => {
-			const {singleUseInfo, currentPlayer, opponentActiveRow} = derivedState
+		game.hooks.applyEffect.tap(this.id, () => {
+			const {singleUseInfo, currentPlayer, opponentActiveRow} = game.ds
 
 			if (singleUseInfo?.id === this.id) {
 				// If opponent has no active hermit, can't activate
@@ -33,8 +40,9 @@ class LootingSingleUseCard extends SingleUseCard {
 			}
 		})
 
-		game.hooks.followUp.tap(this.id, (action, derivedState) => {
-			const {followUp, pickedCardsInfo, currentPlayer} = derivedState
+		game.hooks.followUp.tap(this.id, (action, followUpState) => {
+			const {currentPlayer} = game.ds
+			const {followUp, pickedCardsInfo} = followUpState
 
 			if (followUp === this.id) {
 				delete currentPlayer.coinFlips[this.id]

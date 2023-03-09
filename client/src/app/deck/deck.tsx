@@ -11,6 +11,7 @@ import Accordion from 'components/accordion'
 import {getPlayerDeck} from 'logic/session/session-selectors'
 import {getSettings} from 'logic/local-settings/local-settings-selectors'
 import {PlayerDeckT} from 'types/deck'
+import ImportExport from './import-export'
 
 const TYPED_CARDS = CARDS as Record<string, CardInfoT>
 
@@ -53,6 +54,7 @@ const Deck = ({setMenuSection}: Props) => {
 	const [savedDecks, setSavedDecks] = useState<any>([])
 	const [myDecksOpen, setMyDecksOpen] = useState<boolean>(true)
 	const [loadedDeck, setLoadedDeck] = useState<PlayerDeckT>(playerDeck)
+	const [showImportExport, setShowImportExport] = useState<boolean>(false)
 	const [pickedCards, setPickedCards] = useState<CardT[]>(
 		playerDeck.cards.map((cardId: any) => ({
 			cardId: cardId,
@@ -383,6 +385,13 @@ const Deck = ({setMenuSection}: Props) => {
 					</section>
 				</div>
 			</div>
+			{showImportExport ? (
+				<ImportExport
+					pickedCards={pickedCards}
+					setPickedCards={setPickedCards}
+					close={() => setShowImportExport(false)}
+				/>
+			) : null}
 		</>
 	)
 }

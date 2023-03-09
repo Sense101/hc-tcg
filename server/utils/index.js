@@ -1,9 +1,5 @@
 import CARDS from '../cards'
-import config from '../../server-config.json' assert {type: 'json'}
-
-/**
- * @typedef {import("models/player-model").Player} Player
- */
+import {CONFIG, DEBUG_CONFIG} from '../../config'
 
 export function equalCard(card1, card2) {
 	if (!card1 || !card2) return false
@@ -115,7 +111,7 @@ export function discardSingleUse(game, playerState) {
 	playerState.board.singleUseCard = null
 
 	if (suUsed) {
-		const result = game.hooks.discardCard.get('single_use')?.call(suCard)
+		const result = game.hooks.discardCard.get('single_use')?.call(suCard, true)
 		if (!result) playerState.discarded.push(suCard)
 	} else {
 		playerState.hand.push(suCard)
@@ -133,11 +129,18 @@ export function flipCoin(currentPlayer, times = 1) {
 	return result
 }
 
+export const getOpponentId = (game, playerId) => {
+	const players = game.getPlayers()
+	return players.filter((p) => p.playerId !== playerId)[0]?.playerId
+}
+
 /**
 	@param {Array<string>} deckCards
 */
 export const validateDeck = (deckCards) => {
-	const limits = config.limits
+	if (DEBUG_CONFIG.disableDeckValidation) return
+
+	const limits = CONFIG.limits
 	deckCards = deckCards.filter((cardId) => CARDS[cardId])
 
 	const common = deckCards.filter((cardId) => CARDS[cardId].rarity === 'common')
@@ -174,7 +177,6 @@ export const validateDeck = (deckCards) => {
 	if (tooManyDuplicates)
 		return `You cannot have more than ${limits.maxDuplicates} duplicate cards unless they are item cards.`
 
-	console.log()
 	if (deckCards.length < limits.minCards)
 		return `Deck must have at least ${limits.minCards} cards.`
 	if (deckCards.length > limits.maxCards)

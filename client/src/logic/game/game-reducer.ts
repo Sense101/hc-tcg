@@ -3,6 +3,7 @@ import {
 	GameState,
 	CardT,
 	GameEndReasonT,
+	GameEndOutcomeT,
 	CurrentCoinFlipT,
 } from 'types/game-state'
 import {PickProcessT} from 'types/pick-process'
@@ -13,27 +14,34 @@ type LocalGameState = {
 	opponentId: string
 	gameState: GameState | null
 	availableActions: Array<string>
+	time: number
 	selectedCard: CardT | null
 	openedModal: {
 		id: string
 		info: null
 	} | null
 	pickProcess: PickProcessT | null
-	endGameOverlay: GameEndReasonT
+	endGameOverlay: {
+		reason: GameEndReasonT
+		outcome: GameEndOutcomeT
+	} | null
 	chat: Array<MessageInfoT>
 	currentCoinFlip: CurrentCoinFlipT | null
+	opponentConnected: boolean
 }
 
 const defaultState: LocalGameState = {
 	opponentId: '',
 	gameState: null,
 	availableActions: [],
+	time: 0,
 	selectedCard: null,
 	openedModal: null,
 	pickProcess: null,
 	endGameOverlay: null,
 	chat: [],
 	currentCoinFlip: null,
+	opponentConnected: true,
 }
 
 const gameReducer = (
@@ -47,6 +55,7 @@ const gameReducer = (
 				opponentId: action.payload.opponentId,
 				gameState: action.payload.gameState,
 				availableActions: action.payload.availableActions,
+				time: action.payload.time,
 			}
 			if (
 				state.gameState?.turnPlayerId === action.payload.gameState?.turnPlayerId
@@ -65,12 +74,14 @@ const gameReducer = (
 				opponentId: '',
 				gameState: null,
 				availableActions: [],
+				time: 0,
 				selectedCard: null,
 				openedModal: null,
 				pickProcess: null,
 				endGameOverlay: null,
 				currentCoinFlip: null,
 				chat: [],
+				opponentConnected: true,
 			}
 		case 'SET_SELECTED_CARD':
 			if (state.pickProcess) return state
@@ -110,6 +121,11 @@ const gameReducer = (
 			return {
 				...state,
 				chat: action.payload,
+			}
+		case 'SET_OPPONENT_CONNECTION':
+			return {
+				...state,
+				opponentConnected: action.payload,
 			}
 		case 'SET_COIN_FLIP':
 			return {

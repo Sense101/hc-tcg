@@ -296,6 +296,8 @@ header {
 }
 
 .limits {
+	flex: 1 1 auto;
+	min-width: 0;
 	font-family: Minecraft;
 	font-size: 12px;
 }
@@ -336,6 +338,11 @@ header {
 
 .ultraRareAmount {
 	color: rgb(98, 255, 255);
+}
+
+.saveLoadDecks {
+	display: flex;
+	flex-flow: row nowrap;
 }
 
 .dynamicSpace {

@@ -1,6 +1,10 @@
 import SingleUseCard from './_single-use-card'
 import {applySingleUse, hasSingleUse} from '../../../utils'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 class ChorusFruitSingleUseCard extends SingleUseCard {
 	constructor() {
 		super({
@@ -15,9 +19,14 @@ class ChorusFruitSingleUseCard extends SingleUseCard {
 			{target: 'player', type: 'hermit', amount: 1, active: false},
 		]
 	}
+
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
-		game.hooks.changeActiveHermit.tap(this.id, (turnAction, derivedState) => {
-			const {currentPlayer, pastTurnActions} = derivedState
+		game.hooks.changeActiveHermit.tap(this.id, (turnAction, actionState) => {
+			const {currentPlayer} = game.ds
+			const {pastTurnActions} = actionState
 			const chorusFruit = hasSingleUse(currentPlayer, 'chorus_fruit')
 			if (pastTurnActions.includes('ATTACK') && chorusFruit) {
 				applySingleUse(currentPlayer)
@@ -26,13 +35,11 @@ class ChorusFruitSingleUseCard extends SingleUseCard {
 
 		game.hooks.availableActions.tap(
 			this.id,
-			(availableActions, derivedState) => {
-				const {pastTurnActions, currentPlayer} = derivedState
+			(availableActions, pastTurnActions) => {
+				const {playerActiveRow, currentPlayer} = game.ds
 				const chorusFruit = hasSingleUse(currentPlayer, 'chorus_fruit')
 
-				const activeRow =
-					currentPlayer.board.rows[currentPlayer.board.activeRow]
-				const activeIsSleeping = activeRow?.ailments.some(
+				const activeIsSleeping = playerActiveRow?.ailments.some(
 					(a) => a.id === 'sleeping'
 				)
 

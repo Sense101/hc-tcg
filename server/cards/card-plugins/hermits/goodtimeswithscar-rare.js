@@ -1,6 +1,10 @@
 import HermitCard from './_hermit-card'
 import {flipCoin, discardCard} from '../../../utils'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 // - Game should not consume attached totem if deathloop is active
 // - Golden Axe should not bypass deathloop (unlike a totem)
 // - Needs to work for death by being attacked or by death by ailments
@@ -32,31 +36,37 @@ class GoodTimesWithScarRareHermitCard extends HermitCard {
 		this.recoverAmount = 50
 	}
 
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
 		// scar attacks
-		game.hooks.attack.tap(this.id, (target, turnAction, derivedState) => {
-			const {attackerHermitCard, typeAction, currentPlayer} = derivedState
+		game.hooks.attack.tap(this.id, (target, turnAction, attackState) => {
+			const {currentPlayer} = game.ds
+			const {moveRef, attacker, typeAction} = attackState
 
 			if (typeAction !== 'SECONDARY_ATTACK') return target
 			if (!target.isActive) return target
-			if (attackerHermitCard.cardId !== this.id) return target
-			if (currentPlayer.custom[attackerHermitCard.cardInstance]) return target
+			if (moveRef.hermitCard.cardId !== this.id) return target
+			if (currentPlayer.custom[attacker.hermitCard.cardInstance]) return target
 
 			// Create coin flip beforehand to apply fortune if any
 			const coinFlip = flipCoin(currentPlayer)
-			currentPlayer.custom[attackerHermitCard.cardInstance] = coinFlip
-			currentPlayer.custom[this.id] = attackerHermitCard.cardInstance
+			currentPlayer.custom[attacker.hermitCard.cardInstance] = coinFlip
+			currentPlayer.custom[this.id] = attacker.hermitCard.cardInstance
 
 			return target
 		})
 
 		// next turn attack on scar
-		game.hooks.attack.tap(this.id, (target, turnAction, derivedState) => {
-			const {opponentPlayer} = derivedState
-			if (target.row.hermitCard.cardId !== this.id) return target
-
+		game.hooks.attack.tap(this.id, (target) => {
+			const {opponentPlayer} = game.ds
 			const instance = opponentPlayer.custom[this.id]
 			if (!instance) return target
+
+			// Check that we are attacking card that used the Deathloop ability
+			if (target.row.hermitCard.cardInstance !== instance) return target
+
 			const coinFlip = opponentPlayer.custom[instance]
 
 			if (!coinFlip || coinFlip[0] === 'tails') return target
@@ -66,12 +76,12 @@ class GoodTimesWithScarRareHermitCard extends HermitCard {
 		})
 
 		// After attack check if scar's ability was used
-		game.hooks.attackResult.tap(this.id, (target, turnAction, derivedState) => {
-			const {currentPlayer, opponentPlayer, attackerHermitCard} = derivedState
-			if (target.row.hermitCard.cardId !== this.id) return target
+		game.hooks.attackResult.tap(this.id, (target, turnAction, attackState) => {
+			const {currentPlayer, opponentPlayer} = game.ds
 
 			const instance = opponentPlayer.custom[this.id]
 			if (!instance) return target
+			if (target.row.hermitCard.cardInstance !== instance) return target
 			const coinFlip = opponentPlayer.custom[instance]
 			if (!coinFlip) return target
 			if (!target.died && !target.revived) return target
@@ -84,11 +94,11 @@ class GoodTimesWithScarRareHermitCard extends HermitCard {
 		// ailment death
 		game.hooks.hermitDeath.tap(this.id, (recovery, deathInfo) => {
 			const {playerState, row} = deathInfo
-			if (row.hermitCard.cardId !== this.id) return
+			if (row.hermitCard.cardId !== this.id) return recovery
 			const instance = playerState.custom[this.id]
-			if (!instance) return
+			if (!instance) return recovery
 			const coinFlip = playerState.custom[instance]
-			if (!coinFlip) return
+			if (!coinFlip) return recovery
 
 			playerState.coinFlips[this.id] = coinFlip
 
@@ -103,8 +113,8 @@ class GoodTimesWithScarRareHermitCard extends HermitCard {
 		})
 
 		// If scar did not revive by his next turn delete the flag
-		game.hooks.turnStart.tap(this.id, (derivedState) => {
-			const {currentPlayer} = derivedState
+		game.hooks.turnStart.tap(this.id, () => {
+			const {currentPlayer} = game.ds
 			if (currentPlayer.custom[this.id]) {
 				const instance = currentPlayer.custom[this.id]
 				delete currentPlayer.custom[this.id]
@@ -113,14 +123,12 @@ class GoodTimesWithScarRareHermitCard extends HermitCard {
 		})
 
 		// Power can be used only once. This resets it when the card is placed on board. (e.g. when picked from discarded)
-		game.hooks.playCard
-			.for('hermit')
-			.tap(this.id, (turnAction, derivedState) => {
-				const card = turnAction.payload?.card
-				if (!card || card.cardId !== this.id) return
-				const {currentPlayer} = derivedState
-				delete currentPlayer.custom[card.cardInstance]
-			})
+		game.hooks.playCard.for('hermit').tap(this.id, (turnAction) => {
+			const card = turnAction.payload?.card
+			if (!card || card.cardId !== this.id) return
+			const {currentPlayer} = game.ds
+			delete currentPlayer.custom[card.cardInstance]
+		})
 	}
 }
 

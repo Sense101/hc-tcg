@@ -48,6 +48,8 @@ export type PlayerState = {
 export type GameState = {
 	turn: number
 	turnPlayerId: string
+	turnTime: number
+	turnRemaining: number
 	order: Array<PlatyerId>
 	players: Record<string, PlayerState>
 }
@@ -58,12 +60,18 @@ export type GameStatePayload = {
 	opponentId: string
 }
 
-export type GameEndReasonT =
+export type GameEndOutcomeT =
 	| 'client_crash'
 	| 'server_crash'
 	| 'timeout'
-	| 'forfeit'
-	| 'player_left'
+	| 'forfeit_win'
+	| 'forfeit_loss'
+	| 'leave_win'
+	| 'leave_loss'
+	| 'tie'
+	| 'unknown'
 	| 'you_won'
 	| 'you_lost'
 	| null
+
+export type GameEndReasonT = 'hermits' | 'lives' | 'cards' | 'time' | null

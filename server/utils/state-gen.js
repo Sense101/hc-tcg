@@ -1,10 +1,10 @@
 import CARDS from '../cards'
 import STRENGTHS from '../const/strengths'
-import config from '../../server-config.json' assert {type: 'json'}
+import {CONFIG, DEBUG_CONFIG} from '../../config'
 
 /**
- * @typedef {import("models/game-model").Game} Game
- * @typedef {import("models/player-model").Player} Player
+ * @typedef {import("models/game-model").GameModel} GameModel
+ * @typedef {import("models/player-model").PlayerModel} PlayerModel
  */
 
 function randomBetween(min, max) {
@@ -12,7 +12,7 @@ function randomBetween(min, max) {
 }
 
 export function getStarterPack() {
-	const limits = config.limits
+	const limits = CONFIG.limits
 	const hermitTypesCount = randomBetween(2, 3)
 	const hermitTypes = Object.keys(STRENGTHS)
 		.sort(() => 0.5 - Math.random())
@@ -127,7 +127,7 @@ export function getEmptyRow() {
 }
 
 /**
- * @param {Player} player
+ * @param {PlayerModel} player
  * @returns {PlayerState}
  */
 export function getPlayerState(player) {
@@ -143,11 +143,6 @@ export function getPlayerState(player) {
 	// shuffle cards
 	pack.sort(() => 0.5 - Math.random())
 
-	// pack.unshift({
-	// 	cardId: 'grian_rare',
-	// 	cardInstance: Math.random().toString(),
-	// })
-
 	// ensure a hermit in first 5 cards
 	const hermitIndex = pack.findIndex((card) => {
 		return CARDS[card.cardId].type === 'hermit'
@@ -155,6 +150,18 @@ export function getPlayerState(player) {
 	if (hermitIndex > 5) {
 		;[pack[0], pack[hermitIndex]] = [pack[hermitIndex], pack[0]]
 	}
+
+	const hand = pack.slice(0, 7)
+
+	DEBUG_CONFIG.extraStartingCards.forEach((id) => {
+		const card = CARDS[id]
+		if (!!card) {
+			hand.unshift({
+				cardId: id,
+				cardInstance: Math.random().toString(),
+			})
+		}
+	})
 
 	const TOTAL_ROWS = 5
 	return {
@@ -164,7 +171,7 @@ export function getPlayerState(player) {
 		coinFlips: {},
 		followUp: null,
 		lives: 3,
-		hand: pack.slice(0, 7), // 0.7
+		hand,
 		rewards: pack.slice(7, 10),
 		discarded: [],
 		pile: pack.slice(10),
@@ -179,7 +186,7 @@ export function getPlayerState(player) {
 }
 
 /**
- * @param {Game} game
+ * @param {GameModel} game
  * @returns {GameState}
  */
 export function getGameState(game) {
@@ -190,6 +197,9 @@ export function getGameState(game) {
 	const gameState = {
 		turn: 0,
 		order: playerIds,
+		turnPlayerId: null,
+		turnTime: null,
+		turnRemaining: null,
 		players: playerIds.reduce(
 			(playerStates, playerId) => ({
 				...playerStates,

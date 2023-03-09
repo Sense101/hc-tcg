@@ -2,6 +2,10 @@ import HermitCard from './_hermit-card'
 import {flipCoin} from '../../../utils'
 import CARDS from '../../../cards'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 class StressMonster101RareHermitCard extends HermitCard {
 	constructor() {
 		super({
@@ -26,18 +30,18 @@ class StressMonster101RareHermitCard extends HermitCard {
 		})
 	}
 
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
-		game.hooks.attack.tap(this.id, (target, turnAction, derivedState) => {
-			const {
-				attackerHermitCard,
-				typeAction,
-				playerActiveRow,
-				opponentActiveRow,
-			} = derivedState
+		game.hooks.attack.tap(this.id, (target, turnAction, attackState) => {
+			const {playerActiveRow, opponentActiveRow} = game.ds
+			const {moveRef, typeAction} = attackState
 
 			if (typeAction !== 'SECONDARY_ATTACK') return target
 			if (!target.isActive) return target
-			if (attackerHermitCard.cardId !== this.id) return target
+			if (moveRef.hermitCard.cardId !== this.id) return target
+			if (!playerActiveRow || !opponentActiveRow) return target
 
 			playerActiveRow.health = 0
 			opponentActiveRow.health = 0

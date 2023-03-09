@@ -1,11 +1,19 @@
 import {GameStatePayload} from 'types/game-state'
-import {CardT, GameEndReasonT, CurrentCoinFlipT} from 'types/game-state'
+import {
+	CardT,
+	GameEndOutcomeT,
+	GameEndReasonT,
+	CurrentCoinFlipT,
+} from 'types/game-state'
 import {PickProcessT, PickedCardT} from 'types/pick-process'
 import {MessageInfoT} from 'types/chat'
 
 export const gameState = (gameState: GameStatePayload) => ({
 	type: 'GAME_STATE' as const,
-	payload: gameState,
+	payload: {
+		...gameState,
+		time: Date.now(),
+	},
 })
 
 export const gameStart = () => ({
@@ -48,18 +56,32 @@ export const forfeit = () => ({
 	type: 'FORFEIT' as const,
 })
 
-export const startAttack = (type: 'zero' | 'primary' | 'secondary') => ({
+export const startAttack = (
+	type: 'zero' | 'primary' | 'secondary',
+	extra?: Record<string, any>
+) => ({
 	type: 'START_ATTACK' as const,
-	payload: {type},
+	payload: {type, extra},
 })
 
-export const showEndGameOverlay = (reason: GameEndReasonT) => ({
+export const showEndGameOverlay = (
+	outcome: GameEndOutcomeT,
+	reason: GameEndReasonT = null
+) => ({
 	type: 'SHOW_END_GAME_OVERLAY' as const,
-	payload: reason,
+	payload: {
+		outcome,
+		reason,
+	},
 })
 
 export const setCoinFlip = (payload: CurrentCoinFlipT | null) => ({
 	type: 'SET_COIN_FLIP',
+	payload,
+})
+
+export const setOpponentConnection = (payload: boolean) => ({
+	type: 'SET_OPPONENT_CONNECTION',
 	payload,
 })
 
@@ -95,10 +117,11 @@ export const endTurn = () => ({
 
 export const attack = (
 	type: 'zero' | 'primary' | 'secondary',
-	pickedCards: Record<string, Array<CardT>>
+	pickedCards: Record<string, Array<PickedCardT>>,
+	extra?: Record<string, any>
 ) => ({
 	type: 'ATTACK' as const,
-	payload: {type, pickedCards},
+	payload: {type, pickedCards, extra},
 })
 
 export const chatMessage = (message: string) => ({

@@ -1,6 +1,10 @@
 import SingleUseCard from './_single-use-card'
 import {equalCard} from '../../../utils'
 
+/**
+ * @typedef {import('models/game-model').GameModel} GameModel
+ */
+
 /*
 Last lead version:
 EP50 23:05
@@ -21,9 +25,14 @@ class LeadSingleUseCard extends SingleUseCard {
 		]
 		this.pickReqs = this.useReqs
 	}
+
+	/**
+	 * @param {GameModel} game
+	 */
 	register(game) {
-		game.hooks.applyEffect.tap(this.id, (action, derivedState) => {
-			const {singleUseInfo, currentPlayer, pickedCardsInfo} = derivedState
+		game.hooks.applyEffect.tap(this.id, (action, actionState) => {
+			const {singleUseInfo, currentPlayer} = game.ds
+			const {pickedCardsInfo} = actionState
 
 			if (singleUseInfo?.id === this.id) {
 				const suPickedCards = pickedCardsInfo[this.id] || []
