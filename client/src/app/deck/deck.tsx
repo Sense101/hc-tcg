@@ -330,9 +330,17 @@ const Deck = ({setMenuSection}: Props) => {
 								</div>
 
 								<Accordion
-									title="Hermits"
-									count={hermitCards.length}
-									rarity={rarityCount(hermitCards)}
+									header={
+										<p>
+											Hermits{' '}
+											<span style={{fontSize: '0.9rem'}}>
+												({hermitCards.length}){' '}
+												<span>{rarityCount(hermitCards).common}, </span>
+												<span>{rarityCount(hermitCards).rare}, </span>
+												<span>{rarityCount(hermitCards).ultra_rare}</span>
+											</span>
+										</p>
+									}
 								>
 									<CardList
 										cards={sortCards(hermitCards)}
@@ -341,9 +349,8 @@ const Deck = ({setMenuSection}: Props) => {
 									/>
 								</Accordion>
 								<Accordion
-									title="Effects"
-									count={effectCards.length}
-									rarity={rarityCount(effectCards)}
+									header={'Effects' + effectCards.length}
+									// rarity={rarityCount(effectCards)}
 								>
 									<CardList
 										cards={sortCards(effectCards)}
@@ -352,9 +359,8 @@ const Deck = ({setMenuSection}: Props) => {
 									/>
 								</Accordion>
 								<Accordion
-									title="Items"
-									count={itemCards.length}
-									rarity={rarityCount(itemCards)}
+									header={'Items' + itemCards.length}
+									// rarity={rarityCount(itemCards)}
 								>
 									<CardList
 										cards={sortCards(itemCards)}
