@@ -1,16 +1,18 @@
 import classNames from 'classnames'
-import {useState, useEffect} from 'react'
+import {useState, useEffect, ReactNode} from 'react'
 import {useSelector, useDispatch} from 'react-redux'
 import {CardInfoT, RarityT} from 'types/cards'
 import {CardT} from 'types/game-state'
 import CardList from 'components/card-list'
 import CARDS from 'server/cards'
 import {validateDeck} from 'server/utils'
-import css from './deck.module.css'
+import css from './deck.module.scss'
 import Accordion from 'components/accordion'
+import DeckLayout from './layout'
 import {getPlayerDeck} from 'logic/session/session-selectors'
 import {getSettings} from 'logic/local-settings/local-settings-selectors'
 import {PlayerDeckT} from 'types/deck'
+import EditDeck from './deck-edit'
 import ImportExport from './import-export'
 
 const TYPED_CARDS = CARDS as Record<string, CardInfoT>
@@ -23,7 +25,7 @@ const TYPE_ORDER = {
 	health: 4,
 }
 
-const sortCards = (cards: Array<CardT>): Array<CardT> => {
+export const sortCards = (cards: Array<CardT>): Array<CardT> => {
 	return cards.slice().sort((a: CardT, b: CardT) => {
 		const cardInfoA = TYPED_CARDS[a.cardId]
 		const cardInfoB = TYPED_CARDS[b.cardId]
@@ -40,6 +42,42 @@ const sortCards = (cards: Array<CardT>): Array<CardT> => {
 	})
 }
 
+// assigns each card in the array an 'ID' (the name of the card)
+//   and an instance (a randomly generated number)
+export const giveCardInstances = (cards: CardT[]): CardT[] =>
+	cards.map((card: any) => ({
+		cardId: card,
+		cardInstance: Math.random().toString(),
+	}))
+
+const rarityCount = (cardGroup: Array<CardT>): RarityT => {
+	const common = cardGroup.filter(
+		(c) => TYPED_CARDS[c.cardId].rarity === 'common'
+	)
+	const rare = cardGroup.filter((c) => TYPED_CARDS[c.cardId].rarity === 'rare')
+	const ultra_rare = cardGroup.filter(
+		(c) => TYPED_CARDS[c.cardId].rarity === 'ultra_rare'
+	)
+
+	return {
+		common: common.length,
+		rare: rare.length,
+		ultra_rare: ultra_rare.length,
+	}
+}
+
+export const cardGroupHeader = (title: string, cards: CardT[]) => (
+	<p>
+		{`${title} `}
+		<span style={{fontSize: '0.9rem'}}>
+			{`(${cards.length}) `}
+			<span className={css.common}>{rarityCount(cards).common} </span>
+			<span className={css.rare}>{rarityCount(cards).rare} </span>
+			<span className={css.ultraRare}>{rarityCount(cards).ultra_rare}</span>
+		</span>
+	</p>
+)
+
 type Props = {
 	setMenuSection: (section: string) => void
 }
@@ -51,75 +89,46 @@ const Deck = ({setMenuSection}: Props) => {
 	const settings = useSelector(getSettings)
 
 	// STATE
+	const [mode, setMode] = useState<'select' | 'edit' | 'create'>('select')
 	const [savedDecks, setSavedDecks] = useState<any>([])
-	const [myDecksOpen, setMyDecksOpen] = useState<boolean>(true)
-	const [loadedDeck, setLoadedDeck] = useState<PlayerDeckT>(playerDeck)
 	const [showImportExport, setShowImportExport] = useState<boolean>(false)
-	const [pickedCards, setPickedCards] = useState<CardT[]>(
-		playerDeck.cards.map((cardId: any) => ({
-			cardId: cardId,
-			cardInstance: Math.random().toString(),
-		}))
-	)
+	const [loadedDeck, setLoadedDeck] = useState<PlayerDeckT>({
+		...playerDeck,
+		cards: giveCardInstances(playerDeck.cards),
+	})
 
 	// FILTERS
-	const hermitCards = pickedCards.filter(
+	const hermitCards = loadedDeck.cards.filter(
 		(card) => TYPED_CARDS[card.cardId].type === 'hermit'
 	)
-	const effectCards = pickedCards.filter(
+	const effectCards = loadedDeck.cards.filter(
 		(card) =>
 			TYPED_CARDS[card.cardId].type === 'effect' ||
 			TYPED_CARDS[card.cardId].type === 'single_use'
 	)
-	const itemCards = pickedCards.filter(
+	const itemCards = loadedDeck.cards.filter(
 		(card) => TYPED_CARDS[card.cardId].type === 'item'
 	)
-	const rarityCount = (cardGroup: Array<CardT>): RarityT => {
-		const common = cardGroup.filter(
-			(c) => TYPED_CARDS[c.cardId].rarity === 'common'
-		)
-		const rare = cardGroup.filter(
-			(c) => TYPED_CARDS[c.cardId].rarity === 'rare'
-		)
-		const ultra_rare = cardGroup.filter(
-			(c) => TYPED_CARDS[c.cardId].rarity === 'ultra_rare'
-		)
-
-		return {
-			common: common.length,
-			rare: rare.length,
-			ultra_rare: ultra_rare.length,
-		}
-	}
 
 	// MENU LOGIC
 	const backToMenu = () => {
 		dispatch({
 			type: 'UPDATE_DECK',
-			// payload: pickedCards.map((card) => card.cardId), //OLD PAYLOAD
+			// payload: loadedDeck.cards.map((card) => card.cardId), //OLD PAYLOAD
 			payload: {
 				name: loadedDeck.name,
 				icon: loadedDeck.icon,
-				cards: pickedCards.map((card) => card.cardId),
+				cards: loadedDeck.cards.map((card) => card.cardId),
 			},
 		})
 		setMenuSection('mainmenu')
 	}
 	const createNewDeck = () => {
-		console.log('CREATE DECK')
-		dispatch({
-			type: 'UPDATE_DECK',
-			payload: [],
-		})
-		setMenuSection('create-deck')
+		// clearDeck
+		setMode('create')
 	}
 	const editDeck = () => {
-		console.log('EDIT DECK')
-		dispatch({
-			type: 'UPDATE_DECK',
-			payload: pickedCards.map((card) => card.cardId),
-		})
-		setMenuSection('create-deck')
+		setMode('edit')
 	}
 
 	//CARD LOGIC
@@ -133,7 +142,7 @@ const Deck = ({setMenuSection}: Props) => {
 				JSON.stringify({
 					name: 'Default',
 					icon: 'any',
-					cards: pickedCards,
+					cards: loadedDeck.cards,
 				})
 			)
 		}
@@ -149,27 +158,23 @@ const Deck = ({setMenuSection}: Props) => {
 			}
 		}
 
-		console.log('Loaded ' + decks.length + ' decks from Local Storage', decks)
+		console.log('Loaded ' + decks.length + ' decks from Local Storage')
 		setSavedDecks(decks.sort())
 	}
-
-	const clearDeck = () => {
-		setPickedCards([])
-	}
-
 	const loadDeck = (deckName: string) => {
-		if (!deckName) return console.log('Could not load deck...')
+		if (!deckName)
+			return console.log(`[LoadDeck]: Could not load the ${deckName} deck.`)
 		const deck: PlayerDeckT = JSON.parse(
 			localStorage.getItem('Loadout_' + deckName) || '{}'
 		)
-		console.log('Loading deck:', deck)
 
 		// const deckIds = JSON.parse(deck).cards.filter(
 		const deckIds = deck.cards.filter((card: CardT) => TYPED_CARDS[card.cardId])
-		setLoadedDeck(deck)
-		setPickedCards(deckIds)
+		setLoadedDeck({
+			...deck,
+			cards: deckIds,
+		})
 	}
-
 	const deleteDeck = () => {
 		const confirmDelete = confirm(
 			'Are you sure you want to delete the "' + loadedDeck.name + '" deck ?'
@@ -187,8 +192,13 @@ const Deck = ({setMenuSection}: Props) => {
 			loadDeck(JSON.parse(savedDecks[0]).name)
 		}
 	}
-
-	const deckList = savedDecks.map((d: any, i: number) => {
+	const clearDeck = () => {
+		setLoadedDeck({
+			...loadedDeck,
+			cards: [],
+		})
+	}
+	const deckList: ReactNode = savedDecks.map((d: any, i: number) => {
 		const deck: PlayerDeckT = JSON.parse(d)
 		return (
 			<li
@@ -199,7 +209,6 @@ const Deck = ({setMenuSection}: Props) => {
 				key={i}
 				onClick={() => {
 					loadDeck(deck.name)
-					setMyDecksOpen(true)
 				}}
 			>
 				<div className={css.deckImage}>
@@ -212,15 +221,16 @@ const Deck = ({setMenuSection}: Props) => {
 			</li>
 		)
 	})
-
-	const validationMessage = validateDeck(pickedCards.map((card) => card.cardId))
+	const validationMessage = validateDeck(
+		loadedDeck.cards.map((card) => card.cardId)
+	)
 
 	// LOAD DECKS ON PAGE LOAD
 	useEffect(() => {
 		loadSavedDecks()
 	}, [setSavedDecks])
 
-	// SWITCH DECKS SFX
+	// SWITCH DECKS EFFECT
 	useEffect(() => {
 		if (settings.soundOn !== 'off') {
 			const pageTurn = [
@@ -236,170 +246,140 @@ const Deck = ({setMenuSection}: Props) => {
 		console.log('Loaded Deck: ', loadedDeck)
 	}, [loadedDeck])
 
-	// JSX
-	return (
-		<>
-			<header>
-				<div className={css.headerElements}>
-					<img
-						src="../images/back_arrow.svg"
-						alt="back-arrow"
-						className={css.headerReturn}
-						onClick={backToMenu}
-					/>
-					<p className={css.title}>Deck Selection</p>
-				</div>
-			</header>
+	// SWITCH DECK MODE
+	useEffect(() => {
+		router()
+	}, [mode])
 
-			<div className={css.background} />
-			<div className={css.body}>
-				<div className={css.deckWrapper}>
-					{/* MOBILE DECK SELECTION SECTION */}
-					<section className={css.mobileDeckSelect}>
-						{/* Header */}
-						<div
-							className={css.myDecksHeader}
-							onClick={() => setMyDecksOpen(!myDecksOpen)}
-						>
-							<img src="../images/card-icon.png" alt="card-icon" />
-							<p>My Decks</p>
-						</div>
-
-						{/* Content */}
-						<div
-							className={classNames(
-								css.mobileDeckContent,
-								myDecksOpen ? css.hide : null
-							)}
-						>
-							{/* Deck list */}
-							<ul className={css.mobileDeckList}>{deckList}</ul>
-
-							{/* Create button */}
-							<div className={css.newDeckButton} onClick={createNewDeck}>
-								<p>Create New Deck</p>
-							</div>
-						</div>
-					</section>
-
-					{/* SELECTED DECK SECTION */}
-					<section className={css.deck}>
-						<div className={css.deckHeader}>
-							<div className={css.deckImage}>
-								<img
-									src={
-										'../images/types/type-' +
-										(!loadedDeck.icon ? 'any' : loadedDeck.icon) +
-										'.png'
-									}
-									alt="deck-icon"
-								/>
-							</div>
-							<p className={css.deckName}>{loadedDeck.name}</p>
-							<div className={css.dynamicSpace}></div>
-							<p>
-								{rarityCount(pickedCards).common},
-								{rarityCount(pickedCards).rare},
-								{rarityCount(pickedCards).ultra_rare}
-							</p>
-							<p
-								className={classNames(
-									css.cardCount,
-									pickedCards.length != 42 ? css.error : null
-								)}
-							>
-								{pickedCards.length}/42 <span>Cards</span>
-							</p>
-							<button onClick={() => editDeck()}>
-								<img src="../images/edit-icon.svg" alt="edit" />
-							</button>
-							<button onClick={() => deleteDeck()}>
-								<img src="../images/delete-icon.svg" alt="delete" />
-							</button>
-						</div>
-
-						<div className={css.deckBody}>
-							<div className={css.deckScroll}>
-								<div
-									className={classNames(
-										css.validationMessage,
-										!validationMessage ? css.hide : null
-									)}
-								>
-									{validationMessage}
-								</div>
-
-								<Accordion
-									header={
-										<p>
-											Hermits{' '}
-											<span style={{fontSize: '0.9rem'}}>
-												({hermitCards.length}){' '}
-												<span>{rarityCount(hermitCards).common}, </span>
-												<span>{rarityCount(hermitCards).rare}, </span>
-												<span>{rarityCount(hermitCards).ultra_rare}</span>
-											</span>
-										</p>
-									}
-								>
-									<CardList
-										cards={sortCards(hermitCards)}
-										size="small"
-										wrap={true}
-									/>
-								</Accordion>
-								<Accordion
-									header={'Effects' + effectCards.length}
-									// rarity={rarityCount(effectCards)}
-								>
-									<CardList
-										cards={sortCards(effectCards)}
-										size="small"
-										wrap={true}
-									/>
-								</Accordion>
-								<Accordion
-									header={'Items' + itemCards.length}
-									// rarity={rarityCount(itemCards)}
-								>
-									<CardList
-										cards={sortCards(itemCards)}
-										size="small"
-										wrap={true}
-									/>
-								</Accordion>
-							</div>
-						</div>
-					</section>
-
-					{/* MY DECKS SECTION */}
-					<section className={css.myDecks}>
-						<div className={css.myDecksHeader}>
-							<img
-								src="../images/card-icon.png"
-								alt="card-icon"
-								onClick={() => loadSavedDecks()}
-							/>
-							<p>My Decks</p>
-						</div>
-
-						<ul className={css.myDecksList}>{deckList}</ul>
-
+	// SELECT DECK MODE ... TODO: Create own component
+	const SelectDeck = () => (
+		<DeckLayout title="Deck Selection" back={backToMenu}>
+			{showImportExport && (
+				<ImportExport
+					pickedCards={loadedDeck.cards}
+					setPickedCards={() => alert('SET PICKED CARDS...')}
+					close={() => setShowImportExport(false)}
+				/>
+			)}
+			<DeckLayout.Sidebar
+				header={
+					<>
+						<img src="../images/card-icon.png" alt="card-icon" />
+						<p>My Decks</p>
+					</>
+				}
+				footer={
+					<>
 						<div className={css.newDeckButton} onClick={createNewDeck}>
 							<p>Create New Deck</p>
 						</div>
-					</section>
+						<button onClick={() => setShowImportExport(true)}>Import</button>
+					</>
+				}
+			>
+				{deckList}
+			</DeckLayout.Sidebar>
+			<DeckLayout.Main
+				header={
+					<>
+						<div className={css.deckImage}>
+							<img
+								src={
+									'../images/types/type-' +
+									(!loadedDeck.icon ? 'any' : loadedDeck.icon) +
+									'.png'
+								}
+								alt="deck-icon"
+							/>
+						</div>
+						<p className={css.deckName}>{loadedDeck.name}</p>
+						<div className={css.dynamicSpace}></div>
+						<p>
+							<span className={css.common}>
+								{rarityCount(loadedDeck.cards).common}
+							</span>{' '}
+							<span className={css.rare}>
+								{rarityCount(loadedDeck.cards).rare}
+							</span>{' '}
+							<span className={css.ultraRare}>
+								{rarityCount(loadedDeck.cards).ultra_rare}
+							</span>
+						</p>
+						<p
+							className={classNames(
+								css.cardCount,
+								loadedDeck.cards.length != 42 ? css.error : null
+							)}
+						>
+							{loadedDeck.cards.length}/42 <span>Cards</span>
+						</p>
+						<button onClick={() => editDeck()}>
+							<img src="../images/edit-icon.svg" alt="edit" />
+						</button>
+						<button onClick={() => deleteDeck()}>
+							<img src="../images/delete-icon.svg" alt="delete" />
+						</button>
+					</>
+				}
+			>
+				<div
+					className={classNames(
+						css.validationMessage,
+						!validationMessage ? css.hide : null
+					)}
+				>
+					{validationMessage}
 				</div>
-			</div>
-			{showImportExport ? (
-				<ImportExport
-					pickedCards={pickedCards}
-					setPickedCards={setPickedCards}
-					close={() => setShowImportExport(false)}
-				/>
-			) : null}
-		</>
+
+				<Accordion header={cardGroupHeader('Hermits', hermitCards)}>
+					<CardList cards={sortCards(hermitCards)} size="small" wrap={true} />
+				</Accordion>
+
+				<Accordion header={cardGroupHeader('Effects', effectCards)}>
+					<CardList cards={sortCards(effectCards)} size="small" wrap={true} />
+				</Accordion>
+
+				<Accordion header={cardGroupHeader('Items', itemCards)}>
+					<CardList cards={sortCards(itemCards)} size="small" wrap={true} />
+				</Accordion>
+			</DeckLayout.Main>
+		</DeckLayout>
 	)
+
+	// MODE ROUTER
+	const router = () => {
+		switch (mode) {
+			case 'select':
+				return <SelectDeck />
+				break
+			case 'edit':
+				return (
+					<EditDeck
+						back={() => setMode('select')}
+						title={'Deck Editor'}
+						deck={loadedDeck}
+					/>
+				)
+				break
+			case 'create':
+				return (
+					<EditDeck
+						back={() => setMode('select')}
+						title={'Deck Creation'}
+						deck={{
+							name: 'Untitled Deck',
+							icon: 'any',
+							cards: [],
+						}}
+					/>
+				)
+				break
+			default:
+				return <SelectDeck />
+		}
+	}
+
+	return router()
 }
 
 export default Deck

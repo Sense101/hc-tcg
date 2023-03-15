@@ -9,9 +9,7 @@ import Login from './login'
 import Game from './game'
 import MainMenu from './main-menu'
 import Deck from './deck'
-import CreateDeck from './create-deck'
 import MatchMaking from './match-making'
-import css from './app.module.css'
 
 function App() {
 	const playerName = useSelector(getPlayerName)
@@ -30,9 +28,6 @@ function App() {
 				case 'deck':
 					return <Deck setMenuSection={setMenuSection} />
 					break
-				case 'create-deck':
-					return <CreateDeck setMenuSection={setMenuSection} />
-					break
 				default:
 					return <MainMenu setMenuSection={setMenuSection} />
 			}
@@ -42,7 +37,7 @@ function App() {
 
 	return (
 		<main>
-			<div className={css.form}>{router()}</div>
+			{router()}
 			{playerName && !socketStatus ? <LostConnection /> : null}
 		</main>
 	)
