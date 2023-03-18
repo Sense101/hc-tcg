@@ -8,14 +8,32 @@ import {CardT} from 'types/game-state'
 import {PlayerDeckT} from 'types/deck'
 import css from './deck.module.scss'
 import {sortCards, cardGroupHeader} from './deck'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import React from 'react'
+
+const DECK_ICONS = [
+	'any',
+	'builder',
+	'explorer',
+	'farm',
+	'miner',
+	'prankster',
+	'pvp',
+	'redstone',
+	'speedrunner',
+	'terraform',
+]
+
+const RARITIES = ['any', 'common', 'rare', 'ultra_rare']
 
 type Props = {
 	back: () => void
 	title: string
+	saveDeck: (loadedDeck: PlayerDeckT) => void
 	deck: PlayerDeckT
 }
 
-function EditDeck({back, title, deck}: Props) {
+function EditDeck({back, title, saveDeck, deck}: Props) {
 	// STATE
 	const [textQuery, setTextQuery] = useState<string>('')
 	const [rarityQuery, setRarityQuery] = useState<string>('')
@@ -71,7 +89,7 @@ function EditDeck({back, title, deck}: Props) {
 			...loadedDeck,
 			cards: [
 				...loadedDeck.cards,
-				{cardId: card.cardId, cardInstance: card.cardInstance},
+				{cardId: card.cardId, cardInstance: Math.random().toString()},
 			],
 		}))
 	}
@@ -82,6 +100,27 @@ function EditDeck({back, title, deck}: Props) {
 			cards: loadedDeck.cards.filter(
 				(pickedCard) => pickedCard.cardInstance !== card.cardInstance
 			),
+		}))
+	}
+
+	//DECK LOGIC
+	const clearFilters = () => {
+		setTextQuery('')
+		setRarityQuery('')
+		setTypeQuery('')
+	}
+
+	const handleDeckIcon = (option: any) => {
+		setLoadedDeck((loadedDeck) => ({
+			...loadedDeck,
+			icon: option,
+		}))
+	}
+
+	const handleDeckName = (e: any) => {
+		setLoadedDeck((loadedDeck) => ({
+			...loadedDeck,
+			name: e.target.value,
 		}))
 	}
 
@@ -97,7 +136,7 @@ function EditDeck({back, title, deck}: Props) {
 				footer={
 					<div
 						className={css.newDeckButton}
-						onClick={() => alert('Save Deck...')}
+						onClick={() => saveDeck(loadedDeck)}
 					>
 						<p>Save Deck</p>
 					</div>
@@ -134,46 +173,163 @@ function EditDeck({back, title, deck}: Props) {
 			</DeckLayout.Sidebar>
 			<DeckLayout.Main
 				header={
-					<div>
+					<>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger asChild>
+								<button
+									className={css.IconButton}
+									aria-label="Customise options"
+								>
+									<img src={`/images/types/type-${loadedDeck.icon}.png`} />
+								</button>
+							</DropdownMenu.Trigger>
+
+							<DropdownMenu.Content
+								className={css.DropdownMenuContent}
+								sideOffset={4}
+							>
+								<DropdownMenu.Arrow></DropdownMenu.Arrow>
+								<DropdownMenu.Label className={css.DropdownMenuLabel}>
+									Deck Icon
+								</DropdownMenu.Label>
+								{DECK_ICONS.map((option) => (
+									<React.Fragment key={option}>
+										<DropdownMenu.RadioItem
+											value={option}
+											key={option}
+											onSelect={() => handleDeckIcon(option)}
+											className={css.DropdownMenuItem}
+										>
+											<DropdownMenu.ItemIndicator>x</DropdownMenu.ItemIndicator>
+											<img
+												src={`/images/types/type-${option}.png`}
+												style={{height: '1.5rem', width: '1.5rem'}}
+												alt={option}
+											/>
+											<span>{option}</span>
+										</DropdownMenu.RadioItem>
+									</React.Fragment>
+								))}
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
+
 						<input
-							placeholder="Search cards..."
-							value={textQuery}
-							onChange={(e) => setTextQuery(e.target.value)}
+							type="text"
+							maxLength={32}
+							value={loadedDeck.name}
+							placeholder="Untitled Deck"
+							onChange={handleDeckName}
+							className={css.editableDeckName}
 						/>
-						<button onClick={() => setTextQuery('')}>x</button>
-						<select
-							name="type"
-							id="type"
-							className={css.typeFilter}
-							onChange={(e) => setRarityQuery(e.target.value)}
-						>
-							<option value="">Rarity</option>
-							<option disabled>──────────</option>
-							<option value="common">⭐</option>
-							<option value="rare">⭐⭐</option>
-							<option value="ultra_rare">⭐⭐⭐</option>
-						</select>
-						<select
-							name="type"
-							id="type"
-							onChange={(e) => setTypeQuery(e.target.value)}
-						>
-							<option value="">Type</option>
-							<option disabled>──────────</option>
-							<option value="balanced">Balanced</option>
-							<option value="builder">Builder</option>
-							<option value="explorer">Explorer</option>
-							<option value="farm">Farm</option>
-							<option value="miner">Miner</option>
-							<option value="prankster">Prankster</option>
-							<option value="pvp">PVP</option>
-							<option value="redstone">Redstone</option>
-							<option value="speedrunner">Speedrunner</option>
-							<option value="terraform">Terraform</option>
-						</select>
-					</div>
+						<div className={css.dynamicSpace}></div>
+					</>
 				}
 			>
+				{/* Filters Section */}
+				<div className={css.filters}>
+					<button className={css.clearFilters} onClick={clearFilters}>
+						x
+					</button>
+					{/* RADIX DECK ICON DROPDOWN */}
+					{/* TODO: MOVE INTO HEADER */}
+
+					{/* RADIX RARITY FILTER DROPDOWN */}
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger asChild>
+							<button className={css.IconButton} aria-label="Customise options">
+								<img
+									src={`/images/rarities/rarity-${
+										rarityQuery === '' ? 'any' : rarityQuery
+									}.png`}
+								/>
+							</button>
+						</DropdownMenu.Trigger>
+
+						<DropdownMenu.Content
+							className={css.DropdownMenuContent}
+							sideOffset={4}
+						>
+							<DropdownMenu.Arrow></DropdownMenu.Arrow>
+							<DropdownMenu.Label className={css.DropdownMenuLabel}>
+								Rarity Filter
+							</DropdownMenu.Label>
+							{RARITIES.map((option) => (
+								<>
+									<DropdownMenu.RadioItem
+										value={option}
+										key={option}
+										onSelect={() =>
+											setRarityQuery(option === 'any' ? '' : option)
+										}
+										className={css.DropdownMenuItem}
+									>
+										<DropdownMenu.ItemIndicator>x</DropdownMenu.ItemIndicator>
+										<img
+											// src={`../../images/rarity-${option}.png`}
+											src={`/images/rarities/rarity-${option}.png`}
+											// src={any}
+											style={{height: '1.5rem', width: '1.5rem'}}
+											alt={option}
+										/>
+										<span>{option}</span>
+									</DropdownMenu.RadioItem>
+								</>
+							))}
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+
+					{/* RADIX TYPE FILTER DROPDOWN */}
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger asChild>
+							<button className={css.IconButton} aria-label="Customise options">
+								<img
+									src={`../../../public/images/types/type-${
+										typeQuery === '' ? 'any' : typeQuery
+									}.png`}
+								/>
+							</button>
+						</DropdownMenu.Trigger>
+
+						<DropdownMenu.Content
+							className={css.DropdownMenuContent}
+							sideOffset={4}
+						>
+							<DropdownMenu.Arrow></DropdownMenu.Arrow>
+							<DropdownMenu.Label className={css.DropdownMenuLabel}>
+								Type Filter
+							</DropdownMenu.Label>
+							{DECK_ICONS.map((option) => (
+								<>
+									<DropdownMenu.RadioItem
+										value={option}
+										key={option}
+										onSelect={() =>
+											setTypeQuery(option === 'any' ? '' : option)
+										}
+										className={css.DropdownMenuItem}
+									>
+										<DropdownMenu.ItemIndicator>x</DropdownMenu.ItemIndicator>
+										<img
+											src={`../../../public/images/types/type-${option}.png`}
+											style={{height: '1.5rem', width: '1.5rem'}}
+											alt={option}
+										/>
+										<span>{option}</span>
+									</DropdownMenu.RadioItem>
+								</>
+							))}
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+
+					{/* REST OF THE UI */}
+					<input
+						placeholder="Search cards..."
+						value={textQuery}
+						onChange={(e) => setTextQuery(e.target.value)}
+					/>
+				</div>
+
+				{/* Cards Section */}
 				<Accordion header={'Hermits'}>
 					<CardList
 						cards={sortCards(filteredCards).filter(

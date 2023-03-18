@@ -66,6 +66,7 @@ const rarityCount = (cardGroup: Array<CardT>): RarityT => {
 	}
 }
 
+//TODO: This should probably be a component.
 export const cardGroupHeader = (title: string, cards: CardT[]) => (
 	<p>
 		{`${title} `}
@@ -132,6 +133,7 @@ const Deck = ({setMenuSection}: Props) => {
 	}
 
 	//CARD LOGIC
+	// console.log('SAVED DECKS...', JSON.parse(savedDecks))
 	const loadSavedDecks = () => {
 		let lsKey
 		const decks = []
@@ -152,13 +154,14 @@ const Deck = ({setMenuSection}: Props) => {
 			lsKey = localStorage.key(i)
 			// deck = lsKey?.replace(/Loadout_/g, '')
 
-			//if ls key contains 'Loadout_' then add to deckList array.
+			//if ls key contains 'Loadout_' then add to decks array.
 			if (lsKey?.includes('Loadout_')) {
-				decks.push(localStorage.getItem(lsKey))
+				const key = localStorage.getItem(lsKey)
+				decks.push(key)
 			}
 		}
 
-		console.log('Loaded ' + decks.length + ' decks from Local Storage')
+		console.log('Loaded ' + decks.length + ' decks from Local Storage', decks)
 		setSavedDecks(decks.sort())
 	}
 	const loadDeck = (deckName: string) => {
@@ -174,6 +177,37 @@ const Deck = ({setMenuSection}: Props) => {
 			...deck,
 			cards: deckIds,
 		})
+	}
+	const saveDeck = (deck: PlayerDeckT) => {
+		// Check if deckName is a valid string
+		if (!deck.name || /^\s*$/.test(deck.name)) {
+			alert('Invalid deck name. Please try again.')
+			return
+		}
+
+		const trimmedName = deck.name.trim()
+
+		if (savedDecks.includes(trimmedName)) {
+			const confirmOverwrite = confirm(
+				'"' + trimmedName + '" already exists! Would you like to overwrite it?'
+			)
+			if (!confirmOverwrite) return
+			localStorage.removeItem('Loadout_' + trimmedName)
+			// setLoadedDecks([...loadedDecks].filter(d => d !== newDeckName))
+		}
+
+		// Save deck to Local Storage
+		localStorage.setItem(
+			'Loadout_' + trimmedName,
+			JSON.stringify({
+				name: deck.name,
+				icon: deck.icon,
+				cards: deck.cards,
+			})
+		)
+		// setLoadedDecks([newDeckName, ...loadedDecks])
+		loadSavedDecks()
+		alert('"' + trimmedName + '" was saved to Local Storage!')
 	}
 	const deleteDeck = () => {
 		const confirmDelete = confirm(
@@ -270,10 +304,15 @@ const Deck = ({setMenuSection}: Props) => {
 				}
 				footer={
 					<>
-						<div className={css.newDeckButton} onClick={createNewDeck}>
+						<button className={css.newDeckButton} onClick={createNewDeck}>
 							<p>Create New Deck</p>
-						</div>
-						<button onClick={() => setShowImportExport(true)}>Import</button>
+						</button>
+						<button
+							className={classNames(css.button, 'stoneButton')}
+							onClick={() => setShowImportExport(true)}
+						>
+							Import
+						</button>
 					</>
 				}
 			>
@@ -313,10 +352,10 @@ const Deck = ({setMenuSection}: Props) => {
 						>
 							{loadedDeck.cards.length}/42 <span>Cards</span>
 						</p>
-						<button onClick={() => editDeck()}>
+						<button className={'stoneButton'} onClick={() => editDeck()}>
 							<img src="../images/edit-icon.svg" alt="edit" />
 						</button>
-						<button onClick={() => deleteDeck()}>
+						<button className={'stoneButton'} onClick={() => deleteDeck()}>
 							<img src="../images/delete-icon.svg" alt="delete" />
 						</button>
 					</>
@@ -357,6 +396,7 @@ const Deck = ({setMenuSection}: Props) => {
 					<EditDeck
 						back={() => setMode('select')}
 						title={'Deck Editor'}
+						saveDeck={(returnedDeck) => saveDeck(returnedDeck)}
 						deck={loadedDeck}
 					/>
 				)
@@ -366,8 +406,9 @@ const Deck = ({setMenuSection}: Props) => {
 					<EditDeck
 						back={() => setMode('select')}
 						title={'Deck Creation'}
+						saveDeck={(returnedDeck) => saveDeck(returnedDeck)}
 						deck={{
-							name: 'Untitled Deck',
+							name: '',
 							icon: 'any',
 							cards: [],
 						}}
