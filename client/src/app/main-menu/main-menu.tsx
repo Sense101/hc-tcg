@@ -61,12 +61,6 @@ function MainMenu({setMenuSection}: Props) {
 						>
 							Customize Deck
 						</button>
-						<button
-							className={classNames(css.menuButton, 'stoneButton')}
-							onClick={handleDeck}
-						>
-							Deck Selection
-						</button>
 
 						{/* Smaller Button Container */}
 						<div className={css.smallButtonContainer}>

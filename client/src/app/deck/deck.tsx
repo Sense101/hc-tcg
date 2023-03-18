@@ -303,17 +303,21 @@ const Deck = ({setMenuSection}: Props) => {
 					</>
 				}
 				footer={
-					<>
+					<div className={css.splitButton}>
 						<button className={css.newDeckButton} onClick={createNewDeck}>
 							<p>Create New Deck</p>
 						</button>
 						<button
-							className={classNames(css.button, 'stoneButton')}
+							className={classNames(css.newDeckButton)}
 							onClick={() => setShowImportExport(true)}
 						>
-							Import
+							<img
+								src="/images/import.svg"
+								alt="import"
+								className={css.caret}
+							/>
 						</button>
-					</>
+					</div>
 				}
 			>
 				{deckList}
