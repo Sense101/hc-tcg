@@ -1,10 +1,9 @@
-import CARDS from '../cards'
+import CARDS, {ITEM_CARDS} from '../cards'
 
 /**
  * @typedef {import('models/game-model').GameModel} GameModel
  * @typedef {import('common/types/game-state').PlayerState} PlayerState
  * @typedef {import('common/types/game-state').CoinFlipT} CoinFlipT
- * @typedef {import('common/types/cards').ItemCardT} ItemCardT
  */
 
 export function equalCard(card1, card2) {
@@ -19,7 +18,8 @@ export function hasEnoughItems(itemCards, cost) {
 	// transform item cards into cost
 	// ['eye_of_ender_2x', 'oak_stairs'] -> ['speedrunner', 'speedrunner', 'builder']
 	const energy = itemCardIds.reduce((result, cardId) => {
-		const itemCard = /** @type {ItemCardT} */ (CARDS[cardId])
+		const itemCard = ITEM_CARDS[cardId]
+		if (!itemCard) return result
 		result.push(itemCard.hermitType)
 		// all rare item cards are x2
 		if (itemCard.rarity === 'rare') {
