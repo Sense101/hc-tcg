@@ -8,6 +8,10 @@
 	--color-secondary-shadow: #e159c2;
 	--color-secondary-highlight: #fcaae8;
 
+	--color-error: #ca3636;
+	--color-error-shadow: #ad1d1d;
+	--color-error-highlight: #cf4a4a;
+
 	--gray-900: rgb(30, 30, 31);
 	--gray-800: rgb(37, 38, 39);
 	--gray-700: rgb(49, 50, 51);
@@ -131,6 +135,11 @@ button {
 	color: #ffffa0;
 }
 
+.stoneButton:focus {
+	border: 2px solid var(--gray-50);
+	filter: brightness(1.1);
+}
+
 input {
 	width: 200px;
 	padding: 0 10px;
@@ -198,7 +207,7 @@ li {
 
 /* changes for new look, note that all the above will get redone eventually */
 
-.temp button {
+/* .temp button {
 	line-height: 100%;
 	text-align: center;
 	height: 5vh;
@@ -220,4 +229,4 @@ li {
 .temp input:focus-visible {
 	outline-offset: 0;
 	outline: none;
-}
+} */

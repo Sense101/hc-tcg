@@ -2,6 +2,7 @@ import {useDispatch, useSelector} from 'react-redux'
 import {setSetting} from 'logic/local-settings/local-settings-actions'
 import {getSettings} from 'logic/local-settings/local-settings-selectors'
 import css from './sound-button.module.css'
+import Button from 'components/button'
 
 function SoundButton() {
 	const dispatch = useDispatch()
@@ -12,7 +13,11 @@ function SoundButton() {
 	}
 
 	return (
-		<button className={css.soundButton} onClick={handleSoundChange}>
+		<Button
+			variant="stone"
+			className={css.soundButton}
+			onClick={handleSoundChange}
+		>
 			<img
 				src={
 					settings.soundOn !== 'off'
@@ -20,7 +25,7 @@ function SoundButton() {
 						: '/images/icons/volume-xmark-solid.svg'
 				}
 			/>
-		</button>
+		</Button>
 	)
 }
 

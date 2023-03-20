@@ -8,6 +8,7 @@ import {equalCard} from 'server/utils'
 import {getPlayerState} from 'logic/game/game-selectors'
 
 import {applyEffect, removeEffect} from 'logic/game/game-actions'
+import Button from 'components/button'
 
 type Props = {
 	closeModal: () => void
@@ -49,7 +50,9 @@ function ChestModal({closeModal}: Props) {
 					/>
 				</div>
 				<div className={css.options}>
-					<button onClick={handleConfirm}>Confirm Selection</button>
+					<Button variant="stone" onClick={handleConfirm}>
+						Confirm Selection
+					</Button>
 				</div>
 			</div>
 		</Modal>

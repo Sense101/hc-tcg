@@ -14,6 +14,8 @@ import {getSettings} from 'logic/local-settings/local-settings-selectors'
 import {PlayerDeckT} from 'types/deck'
 import EditDeck from './deck-edit'
 import ImportExport from './import-export'
+import AlertModal from 'components/alert-modal/alert-modal'
+import Button from 'components/button'
 
 const TYPED_CARDS = CARDS as Record<string, CardInfoT>
 
@@ -210,21 +212,16 @@ const Deck = ({setMenuSection}: Props) => {
 		alert('"' + trimmedName + '" was saved to Local Storage!')
 	}
 	const deleteDeck = () => {
-		const confirmDelete = confirm(
-			'Are you sure you want to delete the "' + loadedDeck.name + '" deck ?'
-		)
-		if (confirmDelete) {
-			localStorage.removeItem('Loadout_' + loadedDeck.name)
-			clearDeck()
-			console.log(loadedDeck.name + ' was removed from LocalStorage.')
+		localStorage.removeItem('Loadout_' + loadedDeck.name)
+		clearDeck()
+		console.log(loadedDeck.name + ' was removed from LocalStorage.')
 
-			// const removedDeck = [...savedDecks].filter((d) => d !== loadedDeck)
-			// setSavedDecks(removedDeck)
-			// console.log('Decks in localstorage: ', removedDeck)
-			loadSavedDecks()
-			// Load first deck from local storage
-			loadDeck(JSON.parse(savedDecks[0]).name)
-		}
+		// const removedDeck = [...savedDecks].filter((d) => d !== loadedDeck)
+		// setSavedDecks(removedDeck)
+		// console.log('Decks in localstorage: ', removedDeck)
+		loadSavedDecks()
+		// Load first deck from local storage
+		loadDeck(JSON.parse(savedDecks[0]).name)
 	}
 	const clearDeck = () => {
 		setLoadedDeck({
@@ -303,21 +300,23 @@ const Deck = ({setMenuSection}: Props) => {
 					</>
 				}
 				footer={
-					<div className={css.splitButton}>
-						<button className={css.newDeckButton} onClick={createNewDeck}>
-							<p>Create New Deck</p>
-						</button>
-						<button
-							className={classNames(css.newDeckButton)}
-							onClick={() => setShowImportExport(true)}
-						>
-							<img
-								src="/images/import.svg"
-								alt="import"
-								className={css.caret}
-							/>
-						</button>
-					</div>
+					<>
+						<Button.SplitGroup style={{padding: '0.5rem'}}>
+							<Button variant="primary" onClick={createNewDeck}>
+								Create New Deck
+							</Button>
+							<Button
+								variant="primary"
+								onClick={() => setShowImportExport(true)}
+							>
+								<img
+									src="/images/import.svg"
+									alt="import"
+									className={css.caret}
+								/>
+							</Button>
+						</Button.SplitGroup>
+					</>
 				}
 			>
 				{deckList}
@@ -356,12 +355,16 @@ const Deck = ({setMenuSection}: Props) => {
 						>
 							{loadedDeck.cards.length}/42 <span>Cards</span>
 						</p>
-						<button className={'stoneButton'} onClick={() => editDeck()}>
+						<Button variant="stone" onClick={() => editDeck()}>
 							<img src="../images/edit-icon.svg" alt="edit" />
-						</button>
-						<button className={'stoneButton'} onClick={() => deleteDeck()}>
-							<img src="../images/delete-icon.svg" alt="delete" />
-						</button>
+						</Button>
+						<AlertModal
+							button={<img src="../images/delete-icon.svg" alt="delete" />}
+							title="Delete Deck"
+							description={`Are you sure you wish to delete the "${loadedDeck.name}" deck?`}
+							actionText={`Delete`}
+							action={() => deleteDeck()}
+						/>
 					</>
 				}
 			>

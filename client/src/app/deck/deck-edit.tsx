@@ -10,6 +10,7 @@ import css from './deck.module.scss'
 import {sortCards, cardGroupHeader} from './deck'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import React from 'react'
+import Button from 'components/button'
 
 const DECK_ICONS = [
 	'any',
@@ -124,8 +125,13 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 		}))
 	}
 
+	const handleBack = () => {
+		// alert('TEST!')
+		back()
+	}
+
 	return (
-		<DeckLayout title={title} back={back}>
+		<DeckLayout title={title} back={handleBack}>
 			<DeckLayout.Sidebar
 				header={
 					<>
@@ -134,12 +140,13 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 					</>
 				}
 				footer={
-					<div
-						className={css.newDeckButton}
+					<Button
+						variant="primary"
 						onClick={() => saveDeck(loadedDeck)}
+						styles={{margin: '0.5rem'}}
 					>
-						<p>Save Deck</p>
-					</div>
+						Save Deck
+					</Button>
 				}
 			>
 				<Accordion
@@ -169,7 +176,14 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 						onClick={removeCard}
 					/>
 				</Accordion>
-				<button onClick={clearDeck}>Remove All</button>
+
+				<Button
+					variant="stone"
+					style={{margin: '0.5rem', width: '100%'}}
+					onClick={clearDeck}
+				>
+					Remove All
+				</Button>
 			</DeckLayout.Sidebar>
 			<DeckLayout.Main
 				header={
@@ -283,7 +297,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 						<DropdownMenu.Trigger asChild>
 							<button className={css.IconButton} aria-label="Customise options">
 								<img
-									src={`../../../public/images/types/type-${
+									src={`/images/types/type-${
 										typeQuery === '' ? 'any' : typeQuery
 									}.png`}
 								/>
@@ -310,7 +324,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 									>
 										<DropdownMenu.ItemIndicator>x</DropdownMenu.ItemIndicator>
 										<img
-											src={`../../../public/images/types/type-${option}.png`}
+											src={`/images/types/type-${option}.png`}
 											style={{height: '1.5rem', width: '1.5rem'}}
 											alt={option}
 										/>

@@ -5,6 +5,7 @@ import {login} from 'logic/session/session-actions'
 import css from './login.module.css'
 import TcgLogo from 'components/tcg-logo'
 import LinkContainer from 'components/link-container'
+import Button from 'components/button'
 
 function Login() {
 	const dispatch = useDispatch()
@@ -34,7 +35,7 @@ function Login() {
 							></input>
 							<span className={css.placeholder}>Player Name</span>
 						</div>
-						<button type="submit">Next</button>
+						<Button type="submit">Next</Button>
 					</form>
 				)}
 				<LinkContainer />

@@ -12,6 +12,7 @@ import LinkContainer from 'components/link-container'
 import More from './main-menu-more'
 import Beef from 'components/beef'
 import classNames from 'classnames'
+import Button from 'components/button'
 
 type Props = {
 	setMenuSection: (section: string) => void
@@ -32,54 +33,48 @@ function MainMenu({setMenuSection}: Props) {
 		content = <More setMenuSection={() => setSubsection(null)} />
 	} else {
 		content = (
-			<div className={`${css.menuBackground} temp`}>
+			<div className={css.menuBackground}>
 				<div className={css.mainContainer}>
 					{/* Button Container */}
 					<TcgLogo />
 					<div className={css.mainButtonContainer}>
-						<button
-							className={classNames(css.menuButton, 'stoneButton')}
+						<Button
+							variant="primary"
+							className={css.MenuButton}
 							onClick={handleRandomMatchmaking}
 						>
 							Public Game
-						</button>
-						<button
-							className={classNames(css.menuButton, 'stoneButton')}
-							onClick={handleCreatePrivateGame}
-						>
-							Create Private Game
-						</button>
-						<button
-							className={classNames(css.menuButton, 'stoneButton')}
-							onClick={handleJoinPrivateGame}
-						>
-							Join Private Game
-						</button>
-						<button
-							className={classNames(css.menuButton, 'stoneButton')}
+						</Button>
+						<div className={css.smallButtonContainer}>
+							<Button
+								variant="default"
+								className={css.MenuButton}
+								onClick={handleCreatePrivateGame}
+							>
+								Create Private Game
+							</Button>
+							<Button
+								variant="default"
+								className={css.MenuButton}
+								onClick={handleJoinPrivateGame}
+							>
+								Join Private Game
+							</Button>
+						</div>
+						<Button
+							variant="secondary"
+							className={classNames(css.MenuButton, 'stoneButton')}
 							onClick={handleDeck}
 						>
 							Customize Deck
-						</button>
-
-						{/* Smaller Button Container */}
-						<div className={css.smallButtonContainer}>
-							<button
-								className={classNames(css.menuButton, 'stoneButton')}
-								onClick={handleLogOut}
-							>
-								Log Out
-							</button>
-							<button
-								className={classNames(css.menuButton, 'stoneButton')}
-								onClick={() => setSubsection('more')}
-							>
-								More
-							</button>
+						</Button>
+						<Button onClick={() => setSubsection('more')}>Settings</Button>
+						<Button onClick={handleLogOut}>Log Out</Button>
+						<div style={{display: 'flex', justifyContent: 'center'}}>
+							<LinkContainer />
 						</div>
+						<Beef />
 					</div>
-					<LinkContainer />
-					<Beef />
 				</div>
 			</div>
 		)

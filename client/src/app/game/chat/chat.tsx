@@ -6,6 +6,7 @@ import {chatMessage} from 'logic/game/game-actions'
 import {getPlayerId} from 'logic/session/session-selectors'
 import {getSettings} from 'logic/local-settings/local-settings-selectors'
 import css from './chat.module.css'
+import Button from 'components/button'
 
 function Chat() {
 	const dispatch = useDispatch()
@@ -24,7 +25,9 @@ function Chat() {
 					[css.newMessage]: lastSeen !== latestMessageTime,
 				})}
 			>
-				<button onClick={() => setShowChat(true)}>{'>'}</button>
+				<Button variant="stone" onClick={() => setShowChat(true)}>
+					{'>'}
+				</Button>
 				<div className={css.indicator} />
 			</div>
 		)
@@ -50,10 +53,10 @@ function Chat() {
 		<div className={css.chat}>
 			<form className={css.publisher} onSubmit={handleNewMessage}>
 				<input autoComplete="off" autoFocus name="message" maxLength={140} />
-				<button>Send</button>
-				<button type="button" onClick={hideChat}>
+				<Button variant="stone">Send</Button>
+				<Button variant="stone" type="button" onClick={hideChat}>
 					{'<'}
-				</button>
+				</Button>
 			</form>
 			<div className={css.messageList}>
 				{chatMessages.map((messageInfo) => {

@@ -5,6 +5,7 @@ import CARDS from 'server/cards'
 import css from './import-export.module.css'
 import {universe} from './import-export-const'
 import Modal from 'components/modal'
+import Button from 'components/button'
 
 const TYPED_CARDS = CARDS as Record<string, CardInfoT>
 
@@ -51,12 +52,12 @@ const ImportExport = ({pickedCards, setPickedCards, close}: Props) => {
 					<input placeholder="Deck hash..." ref={inputRef} />
 				</div>
 				<div className={css.ieButtons}>
-					<button type="button" onClick={importDeck}>
+					<Button variant="stone" onClick={importDeck}>
 						Import
-					</button>
-					<button type="button" onClick={exportDeck}>
+					</Button>
+					<Button variant="stone" onClick={exportDeck}>
 						Export
-					</button>
+					</Button>
 				</div>
 			</div>
 		</Modal>

@@ -98,7 +98,6 @@
 .splitButton {
 	display: flex;
 	margin: 0.5rem;
-	border-radius: 6px;
 
 	.newDeckButton {
 		box-shadow: none;
@@ -152,6 +151,16 @@
 
 .button {
 	margin: 0 1rem;
+}
+
+.sidebarButton {
+	padding: 0.5rem;
+	display: flex;
+	justify-content: stretch;
+
+	> * {
+		flex-grow: 1;
+	}
 }
 
 .common {
@@ -234,6 +243,11 @@ input {
 	gap: 0.25rem;
 	position: relative;
 	z-index: 1;
+}
+
+.caret {
+	height: 1rem;
+	width: 1rem;
 }
 
 /* DESKTOP */

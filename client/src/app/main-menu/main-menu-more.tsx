@@ -4,6 +4,7 @@ import {setSetting} from 'logic/local-settings/local-settings-actions'
 import {getSettings} from 'logic/local-settings/local-settings-selectors'
 import {getStats} from 'logic/fbdb/fbdb-selectors'
 import {resetStats} from 'logic/fbdb/fbdb-actions'
+import Button from 'components/button'
 
 type Props = {
 	setMenuSection: (section: string) => void
@@ -35,22 +36,22 @@ function More({setMenuSection}: Props) {
 		<div className={`${css.menuBackground} ${css.moreBackground} temp`}>
 			<div className={css.moreContainer}>
 				<div className={css.moreButtonContainer}>
-					<button className={css.menuButton} onClick={handleSoundChange}>
+					<Button className={css.menuButton} onClick={handleSoundChange}>
 						Sounds: {getDescriptor(settings.soundOn)}
-					</button>
-					<button className={css.menuButton} onClick={handleProfanityChange}>
+					</Button>
+					<Button className={css.menuButton} onClick={handleProfanityChange}>
 						Profanity filter: {getDescriptor(settings.profanityFilter)}
-					</button>
-					<div className={css.smallButtonContainer}>
-						<button
+					</Button>
+					<div className={css.smallButtonContainer} style={{marginTop: '1rem'}}>
+						<Button
 							className={css.menuButton}
 							onClick={() => setMenuSection('mainmenu')}
 						>
 							Back to menu
-						</button>
-						<button className={css.menuButton} onClick={handleResetStats}>
+						</Button>
+						<Button variant="error" onClick={handleResetStats}>
 							Reset Stats
-						</button>
+						</Button>
 					</div>
 				</div>
 				{/* stats */}

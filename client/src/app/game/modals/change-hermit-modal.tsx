@@ -5,6 +5,7 @@ import css from './change-hermit-modal.module.css'
 import {PickedCardT} from 'types/pick-process'
 import {CardInfoT} from 'types/cards'
 import CARDS from 'server/cards'
+import Button from 'components/button'
 
 const TYPED_CARDS = CARDS as Record<string, CardInfoT>
 
@@ -62,12 +63,18 @@ function ChangeHermitModal({closeModal, info}: Props) {
 				<div className={css.options}>
 					{canChange ? (
 						<>
-							<button onClick={handleYes}>Yes</button>
-							<button onClick={handleNo}>No</button>
+							<Button variant="stone" onClick={handleYes}>
+								Yes
+							</Button>
+							<Button variant="stone" onClick={handleNo}>
+								No
+							</Button>
 						</>
 					) : (
 						<>
-							<button onClick={handleNo}>Ok</button>
+							<Button variant="stone" onClick={handleNo}>
+								Ok
+							</Button>
 						</>
 					)}
 				</div>
