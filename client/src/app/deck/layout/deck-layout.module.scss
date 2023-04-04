@@ -96,7 +96,7 @@ header {
 .wrapper {
 	margin: 1rem auto;
 	display: flex;
-	flex-direction: column;
+	flex-direction: column-reverse;
 	gap: 1rem;
 	height: 100%;
 	width: 100%;
@@ -111,6 +111,6 @@ header {
 	}
 
 	.wrapper {
-		flex-direction: row-reverse;
+		flex-direction: row;
 	}
 }

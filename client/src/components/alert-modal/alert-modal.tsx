@@ -1,49 +1,54 @@
 import {ReactNode} from 'react'
+import cn from 'classnames'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import css from './alert-modal.module.scss'
 import Button from 'components/button'
 
 type AlertModal = {
-	button: ReactNode
+	setOpen: boolean
+	onClose: () => void
+	action: () => void
 	title: ReactNode
 	description: ReactNode
 	actionText: string
-	action: () => void
+	buttonDirection?: 'row' | 'column'
 }
 
 const AlertModal = ({
-	button,
+	setOpen,
+	onClose,
 	title,
 	description,
 	actionText,
 	action,
+	buttonDirection,
 }: AlertModal) => (
-	<AlertDialog.Root>
-		<AlertDialog.Trigger asChild>
-			<Button variant="stone">{button}</Button>
-		</AlertDialog.Trigger>
+	<AlertDialog.Root open={setOpen} onOpenChange={onClose}>
 		<AlertDialog.Portal container={document.getElementById('modal')}>
 			<AlertDialog.Overlay className={css.AlertDialogOverlay} />
 			<AlertDialog.Content className={css.AlertDialogContent}>
 				<AlertDialog.Title className={css.AlertDialogTitle}>
 					{title}
-					<AlertDialog.Cancel>
-						<button className={css.xClose}>
-							<img src="/images/CloseX.svg" alt="close" />
-						</button>
+					<AlertDialog.Cancel className={css.xClose}>
+						<img src="/images/CloseX.svg" alt="close" />
 					</AlertDialog.Cancel>
 				</AlertDialog.Title>
 				<AlertDialog.Description className={css.AlertDialogDescription}>
 					{description}
 				</AlertDialog.Description>
-				<div className={css.buttonContainer}>
+				<div
+					className={cn(
+						css.buttonContainer,
+						buttonDirection === 'column' && css.column
+					)}
+				>
 					<AlertDialog.Cancel asChild>
-						<Button>Cancel</Button>
+						<Button.Ref>Cancel</Button.Ref>
 					</AlertDialog.Cancel>
 					<AlertDialog.Action asChild>
-						<Button variant="error" onClick={action}>
+						<Button.Ref variant="error" onClick={action}>
 							{actionText}
-						</Button>
+						</Button.Ref>
 					</AlertDialog.Action>
 				</div>
 			</AlertDialog.Content>

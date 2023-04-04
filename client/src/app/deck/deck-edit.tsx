@@ -1,19 +1,25 @@
-import {useState} from 'react'
+import {useDeferredValue, useRef, useState} from 'react'
+import {useDispatch} from 'react-redux'
+import classNames from 'classnames'
+import {sortCards, cardGroupHeader, rarityCount, savedDeckNames} from './deck'
+import css from './deck.module.scss'
 import DeckLayout from './layout'
-import CardList from 'components/card-list'
 import CARDS from 'server/cards'
-import Accordion from 'components/accordion'
+import {validateDeck} from 'server/utils'
 import {CardInfoT, HermitCardT, ItemCardT} from 'types/cards'
 import {CardT} from 'types/game-state'
 import {PlayerDeckT} from 'types/deck'
-import css from './deck.module.scss'
-import {sortCards, cardGroupHeader} from './deck'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import React from 'react'
+import CardList from 'components/card-list'
+import Accordion from 'components/accordion'
 import Button from 'components/button'
+import errorIcon from 'components/svgs/errorIcon'
+import Dropdown from 'components/dropdown'
+import {UnsavedModal, OverwriteModal} from './modals'
 
+const RARITIES = ['any', 'common', 'rare', 'ultra_rare']
 const DECK_ICONS = [
 	'any',
+	'balanced',
 	'builder',
 	'explorer',
 	'farm',
@@ -24,24 +30,74 @@ const DECK_ICONS = [
 	'speedrunner',
 	'terraform',
 ]
+const iconDropdownOptions = DECK_ICONS.map((option) => ({
+	name: option,
+	key: option,
+	icon: `/images/types/type-${option}.png`,
+}))
+const rarityDropdownOptions = RARITIES.map((option) => ({
+	name: option,
+	key: option,
+	icon: `/images/rarities/rarity-${option}.png`,
+}))
 
-const RARITIES = ['any', 'common', 'rare', 'ultra_rare']
+type DeckNameT = {
+	loadedDeck: PlayerDeckT
+	setDeckName: (name: string) => void
+}
+
+const DeckName = ({loadedDeck, setDeckName}: DeckNameT) => {
+	const [deckNameInput, setDeckNameInput] = useState<string>(loadedDeck.name)
+	const inputValidationMessage =
+		deckNameInput.length < 1
+			? 'Deck name cannot be empty'
+			: 'Deck name may only contain letters, numbers, and spaces.'
+
+	return (
+		<div>
+			<label htmlFor="deckname">
+				Deck Name
+				<input
+					type="text"
+					value={deckNameInput}
+					onChange={(e) => setDeckNameInput(e.target.value)}
+					maxLength={32}
+					placeholder="Untitled Deck"
+					className={classNames(css.input)}
+					required={true}
+					pattern={`^[a-zA-Z0-9 ]*$`}
+					onBlur={() => setDeckName(deckNameInput)}
+				/>
+				<span className={css.errorMessage}>{inputValidationMessage}</span>
+			</label>
+		</div>
+	)
+}
 
 type Props = {
 	back: () => void
 	title: string
-	saveDeck: (loadedDeck: PlayerDeckT) => void
+	saveDeck: (loadedDeck: PlayerDeckT, initialDeck?: PlayerDeckT) => void
 	deck: PlayerDeckT
 }
 
 function EditDeck({back, title, saveDeck, deck}: Props) {
+	const dispatch = useDispatch()
+
 	// STATE
 	const [textQuery, setTextQuery] = useState<string>('')
 	const [rarityQuery, setRarityQuery] = useState<string>('')
 	const [typeQuery, setTypeQuery] = useState<string>('')
 	const [loadedDeck, setLoadedDeck] = useState<PlayerDeckT>(deck)
+	const [inputIsFocused, setInputIsFocused] = useState<boolean>(false)
+	const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false)
+	const [showUnsavedModal, setShowUnsavedModal] = useState<boolean>(false)
+
+	const deferredTextQuery = useDeferredValue(textQuery)
+	const deckNameRef = useRef<HTMLInputElement>(null)
 
 	//MISC
+	const initialDeckState = deck
 	const TYPED_CARDS = CARDS as Record<string, CardInfoT>
 	const HTYPE_CARDS = CARDS as Record<string, HermitCardT | ItemCardT>
 	const allCards = Object.values(TYPED_CARDS).map(
@@ -50,26 +106,25 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 			cardInstance: card.id,
 		})
 	)
-
-	// FILTERS
-	const hermitCards = loadedDeck.cards.filter(
-		(card) => TYPED_CARDS[card.cardId].type === 'hermit'
-	)
-	const effectCards = loadedDeck.cards.filter(
-		(card) =>
-			TYPED_CARDS[card.cardId].type === 'effect' ||
-			TYPED_CARDS[card.cardId].type === 'single_use'
-	)
-	const itemCards = loadedDeck.cards.filter(
-		(card) => TYPED_CARDS[card.cardId].type === 'item'
-	)
-
+	const selectedCards = {
+		hermits: loadedDeck.cards.filter(
+			(card) => TYPED_CARDS[card.cardId].type === 'hermit'
+		),
+		items: loadedDeck.cards.filter(
+			(card) => TYPED_CARDS[card.cardId].type === 'item'
+		),
+		effects: loadedDeck.cards.filter(
+			(card) =>
+				TYPED_CARDS[card.cardId].type === 'effect' ||
+				TYPED_CARDS[card.cardId].type === 'single_use'
+		),
+	}
 	const filteredCards: CardT[] = allCards.filter(
 		(card) =>
 			// Card Name Filter
 			TYPED_CARDS[card.cardId].name
 				.toLowerCase()
-				.includes(textQuery.toLowerCase()) &&
+				.includes(deferredTextQuery.toLowerCase()) &&
 			// Card Type Filter
 			(HTYPE_CARDS[card.cardId].hermitType === undefined
 				? TYPED_CARDS[card.cardId]
@@ -84,7 +139,6 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 	const clearDeck = () => {
 		setLoadedDeck({...loadedDeck, cards: []})
 	}
-
 	const addCard = (card: CardT) => {
 		setLoadedDeck((loadedDeck) => ({
 			...loadedDeck,
@@ -94,7 +148,6 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 			],
 		}))
 	}
-
 	const removeCard = (card: CardT) => {
 		setLoadedDeck((loadedDeck) => ({
 			...loadedDeck,
@@ -110,274 +163,303 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 		setRarityQuery('')
 		setTypeQuery('')
 	}
-
 	const handleDeckIcon = (option: any) => {
 		setLoadedDeck((loadedDeck) => ({
 			...loadedDeck,
 			icon: option,
 		}))
 	}
-
-	const handleDeckName = (e: any) => {
-		setLoadedDeck((loadedDeck) => ({
-			...loadedDeck,
-			name: e.target.value,
-		}))
-	}
-
 	const handleBack = () => {
-		// alert('TEST!')
+		if (initialDeckState == loadedDeck) {
+			back()
+		} else {
+			setShowUnsavedModal(true)
+		}
+	}
+	const handleSave = () => {
+		const newDeck = {
+			...loadedDeck,
+			name: deckNameRef.current?.value.trim() || '',
+		}
+
+		//If deck name is empty, do nothing
+		if (newDeck.name === '') return
+
+		// Check to see if deck name already exists in Local Storage.
+		//TODO: Can't use includes as it will match partial values in names. Need match to be exact.
+		if (
+			savedDeckNames.includes(newDeck.name) &&
+			initialDeckState.name !== newDeck.name
+		) {
+			return setShowOverwriteModal(true)
+		}
+
+		// Send toast and return to select deck screen
+		saveAndReturn(newDeck, initialDeckState)
+	}
+	const overwrite = () => {
+		const newDeck = {
+			...loadedDeck,
+			name: deckNameRef.current?.value.trim() || '',
+		}
+		saveAndReturn(newDeck)
+	}
+	const saveAndReturn = (deck: PlayerDeckT, initialDeck?: PlayerDeckT) => {
+		saveDeck(deck, initialDeck)
+		dispatch({
+			type: 'SET_TOAST',
+			payload: {
+				open: true,
+				title: 'Deck Saved!',
+				description: `Saved ${deck.name}`,
+				image: `/images/types/type-${deck.icon}.png`,
+			},
+		})
 		back()
 	}
+	const validationMessage = validateDeck(
+		loadedDeck.cards.map((card) => card.cardId)
+	)
 
 	return (
-		<DeckLayout title={title} back={handleBack}>
-			<DeckLayout.Sidebar
-				header={
-					<>
-						<img src="../images/card-icon.png" alt="card-icon" />
-						<p>My Cards</p>
-					</>
-				}
-				footer={
-					<Button
-						variant="primary"
-						onClick={() => saveDeck(loadedDeck)}
-						styles={{margin: '0.5rem'}}
-					>
-						Save Deck
-					</Button>
-				}
-			>
-				<Accordion
-					header={cardGroupHeader('Hermits', hermitCards)}
-					// header={'test'}
-				>
-					<CardList
-						cards={sortCards(hermitCards)}
-						size="small"
-						wrap={true}
-						onClick={removeCard}
-					/>
-				</Accordion>
-				<Accordion header={cardGroupHeader('Items', itemCards)}>
-					<CardList
-						cards={sortCards(itemCards)}
-						size="small"
-						wrap={true}
-						onClick={removeCard}
-					/>
-				</Accordion>
-				<Accordion header={cardGroupHeader('Effects', effectCards)}>
-					<CardList
-						cards={sortCards(effectCards)}
-						size="small"
-						wrap={true}
-						onClick={removeCard}
-					/>
-				</Accordion>
-
-				<Button
-					variant="stone"
-					style={{margin: '0.5rem', width: '100%'}}
-					onClick={clearDeck}
-				>
-					Remove All
-				</Button>
-			</DeckLayout.Sidebar>
-			<DeckLayout.Main
-				header={
-					<>
-						<DropdownMenu.Root>
-							<DropdownMenu.Trigger asChild>
-								<button
-									className={css.IconButton}
-									aria-label="Customise options"
-								>
-									<img src={`/images/types/type-${loadedDeck.icon}.png`} />
-								</button>
-							</DropdownMenu.Trigger>
-
-							<DropdownMenu.Content
-								className={css.DropdownMenuContent}
-								sideOffset={4}
+		<>
+			<OverwriteModal
+				setOpen={showOverwriteModal}
+				onClose={() => setShowOverwriteModal(!showOverwriteModal)}
+				overwrite={overwrite}
+				deck={{...loadedDeck, name: deckNameRef.current?.value.trim() || ''}}
+			/>
+			<UnsavedModal
+				setOpen={showUnsavedModal}
+				onClose={() => setShowUnsavedModal(!showUnsavedModal)}
+				discard={back}
+			/>
+			<DeckLayout title={title} back={handleBack}>
+				<DeckLayout.Main
+					header={
+						<>
+							<Dropdown
+								button={
+									<button className={css.deckImage}>
+										<img
+											src={`/images/rarities/rarity-${
+												rarityQuery === '' ? 'any' : rarityQuery
+											}.png`}
+										/>
+									</button>
+								}
+								label="Rarity Filter"
+								options={rarityDropdownOptions}
+								action={(option) =>
+									setRarityQuery(option === 'any' ? '' : option)
+								}
+							/>
+							<Dropdown
+								button={
+									<button className={css.deckImage}>
+										<img
+											src={`/images/types/type-${
+												typeQuery === '' ? 'any' : typeQuery
+											}.png`}
+										/>
+									</button>
+								}
+								label="Type Filter"
+								options={iconDropdownOptions}
+								action={(option) =>
+									setTypeQuery(option === 'any' ? '' : option)
+								}
+							/>
+							<input
+								placeholder="Search cards..."
+								className={css.input}
+								value={textQuery}
+								onChange={(e) => setTextQuery(e.target.value)}
+							/>
+							<div className={css.dynamicSpace} />
+							<Button
+								// className={css.clearFilters}
+								size="small"
+								variant="default"
+								onClick={clearFilters}
 							>
-								<DropdownMenu.Arrow></DropdownMenu.Arrow>
-								<DropdownMenu.Label className={css.DropdownMenuLabel}>
-									Deck Icon
-								</DropdownMenu.Label>
-								{DECK_ICONS.map((option) => (
-									<React.Fragment key={option}>
-										<DropdownMenu.RadioItem
-											value={option}
-											key={option}
-											onSelect={() => handleDeckIcon(option)}
-											className={css.DropdownMenuItem}
-										>
-											<DropdownMenu.ItemIndicator>x</DropdownMenu.ItemIndicator>
-											<img
-												src={`/images/types/type-${option}.png`}
-												style={{height: '1.5rem', width: '1.5rem'}}
-												alt={option}
-											/>
-											<span>{option}</span>
-										</DropdownMenu.RadioItem>
-									</React.Fragment>
-								))}
-							</DropdownMenu.Content>
-						</DropdownMenu.Root>
-
-						<input
-							type="text"
-							maxLength={32}
-							value={loadedDeck.name}
-							placeholder="Untitled Deck"
-							onChange={handleDeckName}
-							className={css.editableDeckName}
+								Clear Filter
+							</Button>
+						</>
+					}
+				>
+					<Accordion header={'Hermits'}>
+						<CardList
+							cards={sortCards(filteredCards).filter(
+								(card) => TYPED_CARDS[card.cardId].type === 'hermit'
+							)}
+							size="small"
+							wrap={true}
+							onClick={addCard}
 						/>
-						<div className={css.dynamicSpace}></div>
-					</>
-				}
-			>
-				{/* Filters Section */}
-				<div className={css.filters}>
-					<button className={css.clearFilters} onClick={clearFilters}>
-						x
-					</button>
-					{/* RADIX DECK ICON DROPDOWN */}
-					{/* TODO: MOVE INTO HEADER */}
-
-					{/* RADIX RARITY FILTER DROPDOWN */}
-					<DropdownMenu.Root>
-						<DropdownMenu.Trigger asChild>
-							<button className={css.IconButton} aria-label="Customise options">
-								<img
-									src={`/images/rarities/rarity-${
-										rarityQuery === '' ? 'any' : rarityQuery
-									}.png`}
-								/>
-							</button>
-						</DropdownMenu.Trigger>
-
-						<DropdownMenu.Content
-							className={css.DropdownMenuContent}
-							sideOffset={4}
+					</Accordion>
+					<Accordion header={'Items'}>
+						<CardList
+							cards={sortCards(filteredCards).filter(
+								(card) => TYPED_CARDS[card.cardId].type === 'item'
+							)}
+							size="small"
+							wrap={true}
+							onClick={addCard}
+						/>
+					</Accordion>
+					<Accordion header={'Effects'}>
+						<CardList
+							cards={sortCards(filteredCards).filter(
+								(card) =>
+									TYPED_CARDS[card.cardId].type === 'effect' ||
+									TYPED_CARDS[card.cardId].type === 'single_use'
+							)}
+							size="small"
+							wrap={true}
+							onClick={addCard}
+						/>
+					</Accordion>
+				</DeckLayout.Main>
+				<DeckLayout.Sidebar
+					width="half"
+					header={
+						<>
+							<p>My Cards</p>
+							<div className={css.dynamicSpace} />
+							<div className={css.deckDetails}>
+								<p
+									className={classNames(
+										css.cardCount,
+										css.dark,
+										loadedDeck.cards.length != 42 ? css.error : null
+									)}
+								>
+									{loadedDeck.cards.length}/42
+									{/* <span>Cards</span> */}
+								</p>
+								<div className={classNames(css.cardCount, css.dark)}>
+									<p className={css.common}>
+										{rarityCount(loadedDeck.cards).common}
+									</p>{' '}
+									<p className={css.rare}>
+										{rarityCount(loadedDeck.cards).rare}
+									</p>{' '}
+									<p className={css.ultraRare}>
+										{rarityCount(loadedDeck.cards).ultra_rare}
+									</p>
+								</div>
+							</div>
+						</>
+					}
+					footer={
+						<Button
+							variant="primary"
+							onClick={handleSave}
+							styles={{margin: '0.5rem'}}
 						>
-							<DropdownMenu.Arrow></DropdownMenu.Arrow>
-							<DropdownMenu.Label className={css.DropdownMenuLabel}>
-								Rarity Filter
-							</DropdownMenu.Label>
-							{RARITIES.map((option) => (
-								<>
-									<DropdownMenu.RadioItem
-										value={option}
-										key={option}
-										onSelect={() =>
-											setRarityQuery(option === 'any' ? '' : option)
-										}
-										className={css.DropdownMenuItem}
-									>
-										<DropdownMenu.ItemIndicator>x</DropdownMenu.ItemIndicator>
-										<img
-											// src={`../../images/rarity-${option}.png`}
-											src={`/images/rarities/rarity-${option}.png`}
-											// src={any}
-											style={{height: '1.5rem', width: '1.5rem'}}
-											alt={option}
-										/>
-										<span>{option}</span>
-									</DropdownMenu.RadioItem>
-								</>
-							))}
-						</DropdownMenu.Content>
-					</DropdownMenu.Root>
+							Save Deck
+						</Button>
+					}
+				>
+					<div style={{margin: '0.5rem'}}>
+						{validationMessage && (
+							<div className={css.validationMessage}>
+								<span style={{paddingRight: '0.5rem'}}>{errorIcon()}</span>{' '}
+								{validationMessage}
+							</div>
+						)}
 
-					{/* RADIX TYPE FILTER DROPDOWN */}
-					<DropdownMenu.Root>
-						<DropdownMenu.Trigger asChild>
-							<button className={css.IconButton} aria-label="Customise options">
-								<img
-									src={`/images/types/type-${
-										typeQuery === '' ? 'any' : typeQuery
-									}.png`}
+						<label className={css.editDeckInfo}>
+							<h2>Deck Name and Icon</h2>
+							<div className={css.editDeckInfoSettings}>
+								<Dropdown
+									button={
+										<button className={css.deckImage}>
+											<img src={`/images/types/type-${loadedDeck.icon}.png`} />
+										</button>
+									}
+									label="Deck Icon"
+									options={iconDropdownOptions}
+									action={(option) => handleDeckIcon(option)}
 								/>
-							</button>
-						</DropdownMenu.Trigger>
+								<div className={css.inputValidationGroup}>
+									<input
+										type="text"
+										ref={deckNameRef}
+										maxLength={32}
+										defaultValue={loadedDeck.name}
+										placeholder="Untitled Deck"
+										className={classNames(css.input)}
+										required={true}
+										pattern={`^[a-zA-Z0-9 ]*$`}
+										onBlur={() => setInputIsFocused(true)}
+										data-focused={inputIsFocused}
+									/>
+									<span className={css.errorMessage}>
+										{deckNameRef.current && deckNameRef.current.value.length < 1
+											? 'Deck name cannot be empty'
+											: 'Deck name may only contain letters, numbers, and spaces.'}
+									</span>
+								</div>
+							</div>
+						</label>
 
-						<DropdownMenu.Content
-							className={css.DropdownMenuContent}
-							sideOffset={4}
+						<br />
+						<br />
+						<DeckName
+							loadedDeck={loadedDeck}
+							setDeckName={(deckName) =>
+								setLoadedDeck({
+									...loadedDeck,
+									name: deckName,
+								})
+							}
+						/>
+						<br />
+						<br />
+
+						<div style={{zIndex: '-1'}}>
+							<Accordion
+								header={cardGroupHeader('Hermits', selectedCards.hermits)}
+							>
+								<CardList
+									cards={sortCards(selectedCards.hermits)}
+									size="small"
+									wrap={true}
+									onClick={removeCard}
+								/>
+							</Accordion>
+						</div>
+						<Accordion header={cardGroupHeader('Items', selectedCards.items)}>
+							<CardList
+								cards={sortCards(selectedCards.items)}
+								size="small"
+								wrap={true}
+								onClick={removeCard}
+							/>
+						</Accordion>
+						<Accordion
+							header={cardGroupHeader('Effects', selectedCards.effects)}
 						>
-							<DropdownMenu.Arrow></DropdownMenu.Arrow>
-							<DropdownMenu.Label className={css.DropdownMenuLabel}>
-								Type Filter
-							</DropdownMenu.Label>
-							{DECK_ICONS.map((option) => (
-								<>
-									<DropdownMenu.RadioItem
-										value={option}
-										key={option}
-										onSelect={() =>
-											setTypeQuery(option === 'any' ? '' : option)
-										}
-										className={css.DropdownMenuItem}
-									>
-										<DropdownMenu.ItemIndicator>x</DropdownMenu.ItemIndicator>
-										<img
-											src={`/images/types/type-${option}.png`}
-											style={{height: '1.5rem', width: '1.5rem'}}
-											alt={option}
-										/>
-										<span>{option}</span>
-									</DropdownMenu.RadioItem>
-								</>
-							))}
-						</DropdownMenu.Content>
-					</DropdownMenu.Root>
-
-					{/* REST OF THE UI */}
-					<input
-						placeholder="Search cards..."
-						value={textQuery}
-						onChange={(e) => setTextQuery(e.target.value)}
-					/>
-				</div>
-
-				{/* Cards Section */}
-				<Accordion header={'Hermits'}>
-					<CardList
-						cards={sortCards(filteredCards).filter(
-							(card) => TYPED_CARDS[card.cardId].type === 'hermit'
-						)}
-						size="small"
-						wrap={true}
-						onClick={addCard}
-					/>
-				</Accordion>
-				<Accordion header={'Items'}>
-					<CardList
-						cards={sortCards(filteredCards).filter(
-							(card) => TYPED_CARDS[card.cardId].type === 'item'
-						)}
-						size="small"
-						wrap={true}
-						onClick={addCard}
-					/>
-				</Accordion>
-				<Accordion header={'Effects'}>
-					<CardList
-						cards={sortCards(filteredCards).filter(
-							(card) =>
-								TYPED_CARDS[card.cardId].type === 'effect' ||
-								TYPED_CARDS[card.cardId].type === 'single_use'
-						)}
-						size="small"
-						wrap={true}
-						onClick={addCard}
-					/>
-				</Accordion>
-			</DeckLayout.Main>
-		</DeckLayout>
+							<CardList
+								cards={sortCards(selectedCards.effects)}
+								size="small"
+								wrap={true}
+								onClick={removeCard}
+							/>
+						</Accordion>
+						<Button
+							variant="stone"
+							style={{margin: '0.5rem', width: '100%'}}
+							onClick={clearDeck}
+						>
+							Remove All
+						</Button>
+					</div>
+				</DeckLayout.Sidebar>
+			</DeckLayout>
+		</>
 	)
 }
 

@@ -13,18 +13,22 @@
 	display: flex;
 	position: relative;
 	flex-shrink: 0;
+	// flex-wrap: wrap;
 	align-items: center;
 	justify-content: flex-start;
 	min-height: 3rem;
 	/* background-color: #373737; */
 	background-color: var(--gray-700);
 	gap: 0.5rem;
-	padding: 0 1rem;
+	padding: 0.5rem 1rem;
+	filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
 	z-index: 2;
 }
 
 .body {
-	display: block;
+	position: relative;
+	display: flex;
+	flex-direction: column;
 	flex: 0 1 auto;
 	overflow-y: scroll;
 	padding: 1rem;

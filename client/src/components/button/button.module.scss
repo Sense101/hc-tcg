@@ -94,8 +94,34 @@
 	}
 }
 
+// MODIFIERS
 .emphasis {
 	font-family: Minecrafter;
+}
+
+.small {
+	height: 1.6rem;
+}
+
+.medium {
+	height: 2.75rem;
+}
+
+.large {
+	height: 3.5rem;
+	font-size: 1.2rem;
+}
+
+.leftSlot {
+	margin-right: auto;
+	padding-right: 0.5rem;
+	padding-top: 3px;
+}
+
+.rightSlot {
+	margin-left: auto;
+	padding-left: 0.5rem;
+	padding-top: 3px;
 }
 
 // STYLES FOR SPLIT BUTTON

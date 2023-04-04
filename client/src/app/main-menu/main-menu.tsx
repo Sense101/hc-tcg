@@ -66,7 +66,7 @@ function MainMenu({setMenuSection}: Props) {
 							className={classNames(css.MenuButton, 'stoneButton')}
 							onClick={handleDeck}
 						>
-							Customize Deck
+							Manage Decks
 						</Button>
 						<Button onClick={() => setSubsection('more')}>Settings</Button>
 						<Button onClick={handleLogOut}>Log Out</Button>
