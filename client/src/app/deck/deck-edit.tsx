@@ -14,7 +14,7 @@ import Accordion from 'components/accordion'
 import Button from 'components/button'
 import errorIcon from 'components/svgs/errorIcon'
 import Dropdown from 'components/dropdown'
-import {UnsavedModal, OverwriteModal} from './modals'
+import AlertModal from 'components/alert-modal'
 
 const RARITIES = ['any', 'common', 'rare', 'ultra_rare']
 const DECK_ICONS = [
@@ -223,16 +223,21 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 
 	return (
 		<>
-			<OverwriteModal
+			<AlertModal
 				setOpen={showOverwriteModal}
 				onClose={() => setShowOverwriteModal(!showOverwriteModal)}
-				overwrite={overwrite}
-				deck={{...loadedDeck, name: deckNameRef.current?.value.trim() || ''}}
+				action={overwrite}
+				title="Overwrite Deck"
+				description={`The "${loadedDeck.name}" deck already exists! Would you like to overwrite it?`}
+				actionText="Overwrite"
 			/>
-			<UnsavedModal
+			<AlertModal
 				setOpen={showUnsavedModal}
 				onClose={() => setShowUnsavedModal(!showUnsavedModal)}
-				discard={back}
+				action={back}
+				title="Leave Editor"
+				description="Changes you have made will not be saved. Are you sure you want to leave?"
+				actionText="Discard"
 			/>
 			<DeckLayout title={title} back={handleBack}>
 				<DeckLayout.Main

@@ -5,7 +5,7 @@ import {ReactNode, forwardRef} from 'react'
 import React from 'react'
 
 // interface ButtonT extends React.ComponentPropsWithoutRef<'button'> {
-interface ButtonT extends React.ComponentPropsWithRef<'button'> {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	ref?: any
 	variant?: 'default' | 'primary' | 'secondary' | 'error' | 'stone'
 	size?: 'small' | 'medium' | 'large'
@@ -14,6 +14,7 @@ interface ButtonT extends React.ComponentPropsWithRef<'button'> {
 	rightSlot?: ReactNode
 	children: ReactNode
 	styles?: React.CSSProperties
+	attributes?: HTMLButtonElement
 	onClick?: () => void
 }
 
@@ -26,9 +27,11 @@ const Button = ({
 	children,
 	styles,
 	onClick,
-}: ButtonT) => {
+	...props
+}: ButtonProps) => {
 	return (
 		<button
+			{...props}
 			className={classNames(
 				css.button,
 				variant && css[variant],
@@ -55,11 +58,13 @@ const RefButton = forwardRef(function TestButton(
 		children,
 		styles,
 		onClick,
-	}: ButtonT,
+		...props
+	}: ButtonProps,
 	ref: React.ForwardedRef<any>
 ) {
 	return (
 		<button
+			{...props}
 			ref={ref}
 			className={classNames(
 				css.button,

@@ -30,6 +30,11 @@
 	flex-grow: 1;
 }
 
+.menuButton {
+	height: 5vh;
+	color: orange;
+}
+
 /* Main container */
 
 .mainContainer {

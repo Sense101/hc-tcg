@@ -1,1 +1,1 @@
-export {default} from './import-export'
+export {default as ImportExportModal} from './import-export-modal'

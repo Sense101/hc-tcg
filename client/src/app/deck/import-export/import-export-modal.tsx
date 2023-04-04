@@ -2,7 +2,7 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import {useState, useRef} from 'react'
 import Button from 'components/button'
 import {PlayerDeckT} from 'types/deck'
-import {universe} from '../import-export/import-export-const'
+import {universe} from './import-export-const'
 import {CopyIcon} from 'components/svgs'
 import Dropdown from 'components/dropdown'
 import ModalCSS from 'components/alert-modal/alert-modal.module.scss'
@@ -27,6 +27,7 @@ const ImportExportModal = ({
 	const [deckIcon, setDeckIcon] = useState<PlayerDeckT['icon']>('any')
 
 	// EXPORT DECK FUNCTION
+	// TODO: Remove deprecated "btoa" function.
 	const handleExportDeck = () => {
 		const indicies = []
 		for (let i = 0; i < loadedDeck.cards.length; i++) {
@@ -37,6 +38,7 @@ const ImportExportModal = ({
 	}
 
 	//IMPORT DECK FUNCTION
+	// TODO: Remove deprecated "atob" function.
 	const handleImportDeck = () => {
 		if (!hashRef.current) return
 		const deck = []

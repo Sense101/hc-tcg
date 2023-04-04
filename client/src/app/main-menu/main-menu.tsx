@@ -39,37 +39,41 @@ function MainMenu({setMenuSection}: Props) {
 					<TcgLogo />
 					<div className={css.mainButtonContainer}>
 						<Button
-							variant="primary"
-							className={css.MenuButton}
+							variant="stone"
+							className={css.menuButton}
 							onClick={handleRandomMatchmaking}
 						>
 							Public Game
 						</Button>
 						<div className={css.smallButtonContainer}>
 							<Button
-								variant="default"
-								className={css.MenuButton}
+								variant="stone"
+								className={css.menuButton}
 								onClick={handleCreatePrivateGame}
 							>
 								Create Private Game
 							</Button>
 							<Button
-								variant="default"
-								className={css.MenuButton}
+								variant="stone"
+								className={css.menuButton}
 								onClick={handleJoinPrivateGame}
 							>
 								Join Private Game
 							</Button>
 						</div>
 						<Button
-							variant="secondary"
-							className={classNames(css.MenuButton, 'stoneButton')}
+							variant="stone"
+							className={classNames(css.menuButton)}
 							onClick={handleDeck}
 						>
 							Manage Decks
 						</Button>
-						<Button onClick={() => setSubsection('more')}>Settings</Button>
-						<Button onClick={handleLogOut}>Log Out</Button>
+						<Button variant="stone" onClick={() => setSubsection('more')}>
+							Settings
+						</Button>
+						<Button variant="stone" onClick={handleLogOut}>
+							Log Out
+						</Button>
 						<div style={{display: 'flex', justifyContent: 'center'}}>
 							<LinkContainer />
 						</div>

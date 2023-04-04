@@ -13,10 +13,10 @@ import {getPlayerDeck} from 'logic/session/session-selectors'
 import {getSettings} from 'logic/local-settings/local-settings-selectors'
 import {PlayerDeckT} from 'types/deck'
 import EditDeck from './deck-edit'
-import {ImportExportModal} from './modals'
+import {ImportExportModal} from './import-export'
 import Button from 'components/button'
 import AlertModal from 'components/alert-modal'
-import {DeleteIcon, EditIcon, ErrorIcon} from 'components/svgs'
+import {DeleteIcon, EditIcon, ErrorIcon, ExportIcon} from 'components/svgs'
 import {ToastT} from 'types/app'
 
 const TYPED_CARDS = CARDS as Record<string, CardInfoT>
@@ -442,11 +442,7 @@ const Deck = ({setMenuSection}: Props) => {
 											setShowImportExportModal(!showImportExportModal)
 										}
 									>
-										<img
-											src="/images/import.svg"
-											alt="import"
-											className={css.caret}
-										/>
+										<ExportIcon />
 									</Button>
 								</Button.SplitGroup>
 							</>
