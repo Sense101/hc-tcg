@@ -48,7 +48,9 @@ type DeckNameT = {
 }
 
 const DeckName = ({loadedDeck, setDeckName, isValid}: DeckNameT) => {
-	const [deckNameInput, setDeckNameInput] = useState<string>(loadedDeck.name)
+	const [deckNameInput, setDeckNameInput] = useState<string>(
+		loadedDeck.name === 'Default' ? '' : loadedDeck.name
+	)
 	const [inputIsFocused, setInputIsFocused] = useState<boolean>(false)
 	const inputRef = useRef<HTMLInputElement>(null)
 
