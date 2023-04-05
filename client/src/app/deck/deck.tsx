@@ -496,7 +496,7 @@ const Deck = ({setMenuSection}: Props) => {
 							</>
 						}
 					>
-						{savedDecks.length < 1 && (
+						{savedDecks.length == 1 && (
 							<p style={{fontSize: '0.9rem', padding: '0.5rem'}}>
 								Looks like you don't have any decks! Create your own or import
 								one from a friend!
@@ -504,7 +504,7 @@ const Deck = ({setMenuSection}: Props) => {
 						)}
 						{getLegacyDecks() === true && (
 							<Button
-								style={{marginInline: 'auto', marginTop: '0.5rem'}}
+								style={{margin: '0.5rem auto'}}
 								onClick={convertLegacyDecks}
 							>
 								Import Legacy Decks

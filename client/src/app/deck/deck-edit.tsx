@@ -44,32 +44,40 @@ const rarityDropdownOptions = RARITIES.map((option) => ({
 type DeckNameT = {
 	loadedDeck: PlayerDeckT
 	setDeckName: (name: string) => void
+	isValid: (valid: boolean) => void
 }
 
-const DeckName = ({loadedDeck, setDeckName}: DeckNameT) => {
+const DeckName = ({loadedDeck, setDeckName, isValid}: DeckNameT) => {
 	const [deckNameInput, setDeckNameInput] = useState<string>(loadedDeck.name)
-	const inputValidationMessage =
-		deckNameInput.length < 1
-			? 'Deck name cannot be empty'
-			: 'Deck name may only contain letters, numbers, and spaces.'
+	const [inputIsFocused, setInputIsFocused] = useState<boolean>(false)
+	const inputRef = useRef<HTMLInputElement>(null)
+
+	const handleBlur = () => {
+		setInputIsFocused(true)
+		setDeckName(deckNameInput)
+		isValid(inputRef.current?.validity.valid || false)
+	}
 
 	return (
-		<div>
-			<label htmlFor="deckname">
-				Deck Name
-				<input
-					type="text"
-					value={deckNameInput}
-					onChange={(e) => setDeckNameInput(e.target.value)}
-					maxLength={32}
-					placeholder="Untitled Deck"
-					className={classNames(css.input)}
-					required={true}
-					pattern={`^[a-zA-Z0-9 ]*$`}
-					onBlur={() => setDeckName(deckNameInput)}
-				/>
-				<span className={css.errorMessage}>{inputValidationMessage}</span>
-			</label>
+		<div className={css.inputValidationGroup}>
+			<input
+				ref={inputRef}
+				id="deckname"
+				type="text"
+				value={deckNameInput}
+				onChange={(e) => setDeckNameInput(e.target.value)}
+				maxLength={32}
+				placeholder="Enter Deck Name..."
+				className={css.input}
+				required={true}
+				pattern={`^[a-zA-Z0-9 ]*$`}
+				onBlur={() => handleBlur()}
+				data-focused={inputIsFocused}
+			/>
+			<p className={css.errorMessage}>
+				Deck name should be between 1-32 characters and shouldn't include any
+				special characters.
+			</p>
 		</div>
 	)
 }
@@ -89,14 +97,13 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 	const [rarityQuery, setRarityQuery] = useState<string>('')
 	const [typeQuery, setTypeQuery] = useState<string>('')
 	const [loadedDeck, setLoadedDeck] = useState<PlayerDeckT>(deck)
-	const [inputIsFocused, setInputIsFocused] = useState<boolean>(false)
+	const [validDeckName, setValidDeckName] = useState<boolean>(true)
 	const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false)
 	const [showUnsavedModal, setShowUnsavedModal] = useState<boolean>(false)
 	const [showDefaultDeckModal, setShowDefaultDeckModal] =
 		useState<boolean>(false)
 
 	const deferredTextQuery = useDeferredValue(textQuery)
-	const deckNameRef = useRef<HTMLInputElement>(null)
 
 	//MISC
 	const initialDeckState = deck
@@ -108,19 +115,6 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 			cardInstance: card.id,
 		})
 	)
-	const selectedCards = {
-		hermits: loadedDeck.cards.filter(
-			(card) => TYPED_CARDS[card.cardId].type === 'hermit'
-		),
-		items: loadedDeck.cards.filter(
-			(card) => TYPED_CARDS[card.cardId].type === 'item'
-		),
-		effects: loadedDeck.cards.filter(
-			(card) =>
-				TYPED_CARDS[card.cardId].type === 'effect' ||
-				TYPED_CARDS[card.cardId].type === 'single_use'
-		),
-	}
 	const filteredCards: CardT[] = allCards.filter(
 		(card) =>
 			// Card Name Filter
@@ -136,6 +130,19 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 				? TYPED_CARDS[card.cardId].rarity === rarityQuery
 				: TYPED_CARDS[card.cardId].rarity?.includes(rarityQuery))
 	)
+	const selectedCards = {
+		hermits: loadedDeck.cards.filter(
+			(card) => TYPED_CARDS[card.cardId].type === 'hermit'
+		),
+		items: loadedDeck.cards.filter(
+			(card) => TYPED_CARDS[card.cardId].type === 'item'
+		),
+		effects: loadedDeck.cards.filter(
+			(card) =>
+				TYPED_CARDS[card.cardId].type === 'effect' ||
+				TYPED_CARDS[card.cardId].type === 'single_use'
+		),
+	}
 
 	//CARD LOGIC
 	const clearDeck = () => {
@@ -179,10 +186,8 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 		}
 	}
 	const handleSave = () => {
-		const newDeck = {
-			...loadedDeck,
-			name: deckNameRef.current?.value.trim() || '',
-		}
+		const newDeck = {...loadedDeck}
+		console.log(`HERE:`)
 
 		//If deck name is empty, do nothing
 		if (newDeck.name === '') return
@@ -205,10 +210,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 		saveAndReturn(newDeck, initialDeckState)
 	}
 	const overwrite = () => {
-		const newDeck = {
-			...loadedDeck,
-			name: deckNameRef.current?.value.trim() || '',
-		}
+		const newDeck = {...loadedDeck}
 		saveAndReturn(newDeck)
 	}
 	const saveAndReturn = (deck: PlayerDeckT, initialDeck?: PlayerDeckT) => {
@@ -251,7 +253,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 				onClose={() => setShowDefaultDeckModal(!showDefaultDeckModal)}
 				action={() => null}
 				title="Default Deck"
-				description="Cannot make changes to the default deck. Choose a new name to save your deck as."
+				description="You cannot make changes to the default deck. Give the deck a new name in order to save it."
 				actionText="Edit"
 			/>
 			<DeckLayout title={title} back={handleBack}>
@@ -377,6 +379,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 							variant="primary"
 							onClick={handleSave}
 							style={{margin: '0.5rem'}}
+							disabled={!validDeckName}
 						>
 							Save Deck
 						</Button>
@@ -390,8 +393,8 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 							</div>
 						)}
 
-						<label className={css.editDeckInfo}>
-							<h2>Deck Name and Icon</h2>
+						<div className={css.editDeckInfo}>
+							<label htmlFor="deckname">Deck Name and Icon</label>
 							<div className={css.editDeckInfoSettings}>
 								<Dropdown
 									button={
@@ -403,41 +406,18 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 									options={iconDropdownOptions}
 									action={(option) => handleDeckIcon(option)}
 								/>
-								<div className={css.inputValidationGroup}>
-									<input
-										type="text"
-										ref={deckNameRef}
-										maxLength={32}
-										defaultValue={loadedDeck.name}
-										placeholder="Untitled Deck"
-										className={classNames(css.input)}
-										required={true}
-										pattern={`^[a-zA-Z0-9 ]*$`}
-										onBlur={() => setInputIsFocused(true)}
-										data-focused={inputIsFocused}
-									/>
-									<span className={css.errorMessage}>
-										{deckNameRef.current && deckNameRef.current.value.length < 1
-											? 'Deck name cannot be empty'
-											: 'Deck name may only contain letters, numbers, and spaces.'}
-									</span>
-								</div>
+								<DeckName
+									loadedDeck={loadedDeck}
+									isValid={(valid) => setValidDeckName(valid)}
+									setDeckName={(deckName) =>
+										setLoadedDeck({
+											...loadedDeck,
+											name: deckName,
+										})
+									}
+								/>
 							</div>
-						</label>
-
-						<br />
-						<br />
-						<DeckName
-							loadedDeck={loadedDeck}
-							setDeckName={(deckName) =>
-								setLoadedDeck({
-									...loadedDeck,
-									name: deckName,
-								})
-							}
-						/>
-						<br />
-						<br />
+						</div>
 
 						<div style={{zIndex: '-1'}}>
 							<Accordion
@@ -471,8 +451,10 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 						</Accordion>
 						<Button
 							variant="stone"
-							style={{margin: '0.5rem', width: '100%'}}
+							size="small"
+							style={{margin: '0.5rem'}}
 							onClick={clearDeck}
+							disabled={loadedDeck.cards.length == 0}
 						>
 							Remove All
 						</Button>
