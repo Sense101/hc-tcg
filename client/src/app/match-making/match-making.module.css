@@ -64,6 +64,7 @@
 	margin-top: 3vh;
 	display: flex;
 	justify-content: space-around;
+	gap: 0.5rem;
 }
 
 .matchMakingContainer form {

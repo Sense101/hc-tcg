@@ -361,7 +361,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 						<Button
 							variant="primary"
 							onClick={handleSave}
-							styles={{margin: '0.5rem'}}
+							style={{margin: '0.5rem'}}
 						>
 							Save Deck
 						</Button>

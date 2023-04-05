@@ -68,12 +68,14 @@ function MainMenu({setMenuSection}: Props) {
 						>
 							Manage Decks
 						</Button>
-						<Button variant="stone" onClick={() => setSubsection('more')}>
-							Settings
-						</Button>
-						<Button variant="stone" onClick={handleLogOut}>
-							Log Out
-						</Button>
+						<div className={css.smallButtonContainer}>
+							<Button variant="stone" onClick={handleLogOut}>
+								Log Out
+							</Button>
+							<Button variant="stone" onClick={() => setSubsection('more')}>
+								Settings
+							</Button>
+						</div>
 						<div style={{display: 'flex', justifyContent: 'center'}}>
 							<LinkContainer />
 						</div>

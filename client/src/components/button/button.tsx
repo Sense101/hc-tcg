@@ -13,7 +13,6 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	leftSlot?: ReactNode
 	rightSlot?: ReactNode
 	children: ReactNode
-	styles?: React.CSSProperties
 	attributes?: HTMLButtonElement
 	onClick?: () => void
 }
@@ -25,10 +24,11 @@ const Button = ({
 	leftSlot,
 	rightSlot,
 	children,
-	styles,
+	// styles,
 	onClick,
 	...props
 }: ButtonProps) => {
+	console.log('Button Props:', props)
 	return (
 		<button
 			{...props}
@@ -36,10 +36,10 @@ const Button = ({
 				css.button,
 				variant && css[variant],
 				size && css[size],
-				emphasis && css.emphasis
+				emphasis && css.emphasis,
+				props.className
 			)}
 			onClick={onClick}
-			style={styles}
 		>
 			{leftSlot && <span className={css.leftSlot}>{leftSlot}</span>}
 			{children}
@@ -56,7 +56,6 @@ const RefButton = forwardRef(function TestButton(
 		leftSlot,
 		rightSlot,
 		children,
-		styles,
 		onClick,
 		...props
 	}: ButtonProps,
@@ -70,10 +69,10 @@ const RefButton = forwardRef(function TestButton(
 				css.button,
 				variant && css[variant],
 				size && css[size],
-				emphasis && css.emphasis
+				emphasis && css.emphasis,
+				props.className
 			)}
 			onClick={onClick}
-			style={styles}
 		>
 			{leftSlot && <span className={css.leftSlot}>{leftSlot}</span>}
 			{children}

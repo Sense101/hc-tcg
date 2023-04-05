@@ -42,7 +42,11 @@ function MatchMaking() {
 		content = (
 			<>
 				<div className={css.message}>Waiting for opponent</div>
-				<Button className={css.matchmakingButton} onClick={handleCancel}>
+				<Button
+					variant="stone"
+					className={css.matchmakingButton}
+					onClick={handleCancel}
+				>
 					Cancel
 				</Button>
 			</>
@@ -67,7 +71,11 @@ function MatchMaking() {
 					{code}
 				</div>
 				<div className={css.options}>
-					<Button className={css.matchmakingButton} onClick={handleCancel}>
+					<Button
+						variant="stone"
+						className={css.matchmakingButton}
+						onClick={handleCancel}
+					>
 						Cancel
 					</Button>
 				</div>
@@ -87,10 +95,16 @@ function MatchMaking() {
 						Invalid code
 					</p>
 					<div className={css.options}>
-						<Button className={css.matchmakingButton} onClick={handleCancel}>
+						<Button
+							variant="stone"
+							className={css.matchmakingButton}
+							onClick={handleCancel}
+						>
 							Cancel
 						</Button>
-						<Button className={css.matchmakingButton}>Join</Button>
+						<Button variant="stone" className={css.matchmakingButton}>
+							Join
+						</Button>
 					</div>
 				</form>
 			</>

@@ -207,7 +207,7 @@ li {
 
 /* changes for new look, note that all the above will get redone eventually */
 
-.temp button {
+/* .temp button {
 	line-height: 100%;
 	text-align: center;
 	height: 5vh;
@@ -229,4 +229,4 @@ li {
 .temp input:focus-visible {
 	outline-offset: 0;
 	outline: none;
-}
+} */

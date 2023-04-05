@@ -74,23 +74,36 @@ function More({setMenuSection}: Props) {
 		<div className={`${css.menuBackground} ${css.moreBackground} temp`}>
 			<div className={css.moreContainer}>
 				<div className={css.moreButtonContainer}>
-					<Button className={css.menuButton} onClick={handleSoundChange}>
+					<Button
+						variant="stone"
+						className={css.menuButton}
+						onClick={handleSoundChange}
+					>
 						Sounds: {getDescriptor(settings.soundOn)}
 					</Button>
-					<Button className={css.menuButton} onClick={handleProfanityChange}>
+					<Button
+						variant="stone"
+						className={css.menuButton}
+						onClick={handleProfanityChange}
+					>
 						Profanity filter: {getDescriptor(settings.profanityFilter)}
 					</Button>
-					<Button className={css.menuButton} onClick={convertLegacyDecks}>
+					<Button
+						variant="stone"
+						className={css.menuButton}
+						onClick={convertLegacyDecks}
+					>
 						Convert Legacy Decks
 					</Button>
 					<div className={css.smallButtonContainer} style={{marginTop: '1rem'}}>
 						<Button
+							variant="stone"
 							className={css.menuButton}
 							onClick={() => setMenuSection('mainmenu')}
 						>
 							Back to menu
 						</Button>
-						<Button variant="error" onClick={handleResetStats}>
+						<Button variant="stone" onClick={handleResetStats}>
 							Reset Stats
 						</Button>
 					</div>

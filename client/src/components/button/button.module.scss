@@ -1,5 +1,6 @@
 .button {
 	font-family: Minecraft;
+	font-size: 1rem;
 	flex-shrink: 0;
 	display: flex;
 	align-items: center;
@@ -15,13 +16,13 @@
 	cursor: pointer;
 	user-select: none;
 
-	&:hover,
-	&:focus {
+	&:hover:not(:disabled),
+	&:focus:not(:disabled) {
 		background: var(--gray-100);
 		filter: brightness(1.1);
 	}
 
-	&:focus {
+	&:focus:not(:disabled) {
 		outline: 3px solid white;
 	}
 
@@ -29,8 +30,13 @@
 		outline: 0;
 	}
 
-	&:active {
+	&:active:not(:disabled) {
 		transform: translateY(1px);
+	}
+
+	&:disabled {
+		filter: brightness(0.6);
+		cursor: not-allowed;
 	}
 }
 
@@ -41,8 +47,8 @@
 		inset -1px -5px 0px 1px var(--color-primary-highlight);
 	color: var(--text-light);
 
-	&:hover,
-	&:focus {
+	&:hover:not(:disabled),
+	&:focus:not(:disabled) {
 		background: var(--color-primary);
 	}
 }
@@ -54,8 +60,8 @@
 		inset -1px -5px 0px 1px var(--color-secondary-highlight);
 	color: var(--text-dark);
 
-	&:hover,
-	&:focus {
+	&:hover:not(:disabled),
+	&:focus:not(:disabled) {
 		background: var(--color-secondary);
 	}
 }
@@ -67,14 +73,14 @@
 		inset -1px -5px 0 0 var(--color-error-highlight);
 	color: var(--text-light);
 
-	&:hover,
-	&:focus {
+	&:hover:not(:disabled),
+	&:focus:not(:disabled) {
 		background: var(--color-error);
 	}
 }
 
 .stone {
-	height: 1.6rem;
+	height: 2.7rem;
 	min-width: 1rem;
 	line-height: 1;
 	overflow: hidden;
@@ -86,10 +92,9 @@
 	text-shadow: 2px 2px #000a;
 	box-shadow: inset -2px -4px #0006, inset 2px 2px #fff7;
 
-	&:hover,
-	&:focus {
-		// background-color: rgba(100, 100, 255, 0.35);
-		background: rgba(91, 93, 160, 1);
+	&:hover:not(:disabled),
+	&:focus:not(:disabled) {
+		background: #999 url('/images/bgbtn.png') center / cover;
 		color: #ffffa0;
 	}
 }
@@ -105,6 +110,7 @@
 
 .medium {
 	height: 2.75rem;
+	font-size: 3rem;
 }
 
 .large {
