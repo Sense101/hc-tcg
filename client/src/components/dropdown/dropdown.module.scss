@@ -34,11 +34,11 @@
 	display: flex;
 	gap: 0.5rem;
 	align-items: center;
-	// height: 25px;
 	padding: 0.25rem;
 	position: relative;
 	user-select: none;
 	outline: none;
+	cursor: pointer;
 
 	::first-letter {
 		text-transform: capitalize;

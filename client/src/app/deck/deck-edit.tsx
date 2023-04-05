@@ -245,7 +245,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 						<>
 							<Dropdown
 								button={
-									<button className={css.deckImage}>
+									<button className={css.dropdownButton}>
 										<img
 											src={`/images/rarities/rarity-${
 												rarityQuery === '' ? 'any' : rarityQuery
@@ -261,7 +261,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 							/>
 							<Dropdown
 								button={
-									<button className={css.deckImage}>
+									<button className={css.dropdownButton}>
 										<img
 											src={`/images/types/type-${
 												typeQuery === '' ? 'any' : typeQuery
@@ -380,7 +380,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 							<div className={css.editDeckInfoSettings}>
 								<Dropdown
 									button={
-										<button className={css.deckImage}>
+										<button className={css.dropdownButton}>
 											<img src={`/images/types/type-${loadedDeck.icon}.png`} />
 										</button>
 									}

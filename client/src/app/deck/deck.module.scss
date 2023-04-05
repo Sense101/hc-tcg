@@ -54,7 +54,6 @@
 	gap: 0.5rem;
 	padding: 0.5rem;
 	user-select: none;
-	/* transition: color 0.5s ease-in-out, font-size 0.5s ease-in-out; */
 
 	&:hover {
 		cursor: pointer;
@@ -72,11 +71,6 @@
 		rgba(var(--color-700), 0),
 		rgba(var(--color-900), 0.4)
 	);
-	// background: linear-gradient(
-	// 	to right,
-	// 	rgba(49, 50, 51, 0),
-	// 	rgba(28, 29, 29, 0.4)
-	// );
 	transition: all 0.25s ease-in-out;
 }
 
@@ -88,7 +82,6 @@
 	justify-content: center;
 	background: var(--color-primary);
 	height: 2.75rem;
-	// margin: 0.5rem;
 	padding: 0 0.5rem;
 	padding-bottom: 0.25rem;
 	box-shadow: inset 0 -4px 1px var(--color-primary-shadow),
@@ -130,7 +123,6 @@
 	}
 
 	.newDeckButton:last-child {
-		// margin-left: -2px;
 		border-left: 0;
 		font-family: Minecraft;
 		min-width: 1.5rem;
@@ -145,7 +137,6 @@
 		color: white;
 		height: 1rem;
 		width: 1rem;
-		// transform: rotate(180deg);
 		filter: brightness(5);
 	}
 }
@@ -158,6 +149,22 @@
 	width: 2rem;
 	height: 2rem;
 	flex-shrink: 0;
+
+	> img {
+		height: 1.5rem;
+		filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.25));
+	}
+}
+
+.dropdownButton {
+	display: grid;
+	place-content: center;
+	background-color: var(--gray-500);
+	border-radius: 6px;
+	width: 2rem;
+	height: 2rem;
+	flex-shrink: 0;
+	cursor: pointer;
 
 	> img {
 		height: 1.5rem;
