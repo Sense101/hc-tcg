@@ -208,8 +208,11 @@ const Deck = ({setMenuSection}: Props) => {
 		!deckExists && saveDeck(deck)
 	}
 	const saveDeck = (deck: PlayerDeckT, prevDeck?: PlayerDeckT) => {
+		console.log(`prevDeck:`, prevDeck)
 		//Remove previous deck from Local Storage
-		prevDeck && localStorage.removeItem(`Deck_${prevDeck.name}`)
+		prevDeck &&
+			prevDeck.name !== 'Default' &&
+			localStorage.removeItem(`Deck_${prevDeck.name}`)
 
 		//Save new deck to Local Storage
 		localStorage.setItem(
