@@ -81,6 +81,9 @@ export function* loginSaga(): SagaIterator {
 		yield put(setPlayerInfo(payload))
 		saveSession(payload)
 
+		// save default deck to local storage
+		localStorage.setItem('Deck_Default', JSON.stringify(payload.playerDeck))
+
 		// set user info for reconnects
 		socket.auth.playerId = payload.playerId
 		socket.auth.playerSecret = payload.playerSecret

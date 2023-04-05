@@ -35,7 +35,9 @@ function Login() {
 							></input>
 							<span className={css.placeholder}>Player Name</span>
 						</div>
-						<Button type="submit">Next</Button>
+						<Button variant="stone" type="submit">
+							Next
+						</Button>
 					</form>
 				)}
 				<LinkContainer />

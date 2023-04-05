@@ -46,8 +46,6 @@ export const sortCards = (cards: Array<CardT>): Array<CardT> => {
 	})
 }
 
-// assigns each card in the array an 'ID' (the name of the card)
-//   and an instance (a randomly generated number)
 export const giveCardInstances = (cards: CardT[] | string[]): CardT[] =>
 	cards.map((card: any) => ({
 		cardId: card,
@@ -70,7 +68,6 @@ export const rarityCount = (cardGroup: Array<CardT>): RarityT => {
 	}
 }
 
-// TODO: Convert to component
 export const cardGroupHeader = (title: string, cards: CardT[]) => (
 	<p>
 		{`${title} `}
@@ -87,7 +84,6 @@ export const getSavedDecks = () => {
 	let lsKey
 	const decks = []
 
-	//loop through Local Storage keys
 	for (let i = 0; i < localStorage.length; i++) {
 		lsKey = localStorage.key(i)
 
@@ -97,7 +93,7 @@ export const getSavedDecks = () => {
 		}
 	}
 
-	console.log('Loaded ' + decks.length + ' decks from Local Storage')
+	console.log(`Loaded ${decks.length} decks from Local Storage`)
 	return decks.sort()
 }
 
@@ -156,22 +152,9 @@ const Deck = ({setMenuSection}: Props) => {
 		image: `images/types/type-${playerDeck.icon}.png`,
 	}
 
-	// FILTERS
-	const hermitCards = loadedDeck.cards.filter(
-		(card) => TYPED_CARDS[card.cardId].type === 'hermit'
-	)
-	const effectCards = loadedDeck.cards.filter(
-		(card) =>
-			TYPED_CARDS[card.cardId].type === 'effect' ||
-			TYPED_CARDS[card.cardId].type === 'single_use'
-	)
-	const itemCards = loadedDeck.cards.filter(
-		(card) => TYPED_CARDS[card.cardId].type === 'item'
-	)
-
 	// MENU LOGIC
 	const backToMenu = () => {
-		if (loadedDeck.cards.length < 42) {
+		if (loadedDeck.cards.length != 42) {
 			return setShowValidateDeckModal(true)
 		}
 
@@ -186,13 +169,6 @@ const Deck = ({setMenuSection}: Props) => {
 			},
 		})
 		setMenuSection('mainmenu')
-	}
-	const createNewDeck = () => {
-		// clearDeck
-		setMode('create')
-	}
-	const editDeck = () => {
-		setMode('edit')
 	}
 	const handleInvalidDeck = () => {
 		setMenuSection('mainmenu')
@@ -211,8 +187,10 @@ const Deck = ({setMenuSection}: Props) => {
 			localStorage.getItem('Deck_' + deckName) || '{}'
 		)
 
-		// const deckIds = JSON.parse(deck).cards.filter(
-		const deckIds = deck.cards.filter((card: CardT) => TYPED_CARDS[card.cardId])
+		const deckIds = deck.cards?.filter(
+			(card: CardT) => TYPED_CARDS[card.cardId]
+		)
+
 		setLoadedDeck({
 			...deck,
 			cards: deckIds,
@@ -259,7 +237,7 @@ const Deck = ({setMenuSection}: Props) => {
 			<li
 				className={classNames(
 					css.myDecksItem,
-					loadedDeck.name === deck.name ? css.selectedDeck : null
+					loadedDeck.name === deck.name && css.selectedDeck
 				)}
 				key={i}
 				onClick={() => {
@@ -280,6 +258,19 @@ const Deck = ({setMenuSection}: Props) => {
 	const validationMessage = validateDeck(
 		loadedDeck.cards.map((card) => card.cardId)
 	)
+	const selectedCards = {
+		hermits: loadedDeck.cards.filter(
+			(card) => TYPED_CARDS[card.cardId].type === 'hermit'
+		),
+		items: loadedDeck.cards.filter(
+			(card) => TYPED_CARDS[card.cardId].type === 'item'
+		),
+		effects: loadedDeck.cards.filter(
+			(card) =>
+				TYPED_CARDS[card.cardId].type === 'effect' ||
+				TYPED_CARDS[card.cardId].type === 'single_use'
+		),
+	}
 
 	//MISC
 	const playSwitchDeckSFX = () => {
@@ -294,6 +285,54 @@ const Deck = ({setMenuSection}: Props) => {
 			)
 			audio.play()
 		}
+	}
+	const getLegacyDecks = () => {
+		for (let i = 0; i < localStorage.length; i++) {
+			const lsKey = localStorage.key(i)
+
+			if (lsKey?.includes('Loadout_')) return true
+		}
+		return false
+	}
+	const convertLegacyDecks = () => {
+		let conversionCount = 0
+		for (let i = 0; i < localStorage.length; i++) {
+			const lsKey = localStorage.key(i)
+
+			if (lsKey?.includes('Loadout_')) {
+				conversionCount = conversionCount + 1
+				const legacyName = lsKey.replace('Loadout_', '[Legacy] ')
+				const legacyDeck = localStorage.getItem(lsKey)
+
+				const convertedDeck = {
+					name: legacyName,
+					icon: 'any',
+					cards: JSON.parse(legacyDeck || ''),
+				}
+
+				localStorage.setItem(
+					`Deck_${legacyName}`,
+					JSON.stringify(convertedDeck)
+				)
+
+				localStorage.removeItem(lsKey)
+				console.log(`Converted deck!:`, lsKey, legacyName)
+			}
+		}
+
+		setSavedDecks(getSavedDecks())
+
+		dispatch({
+			type: 'SET_TOAST',
+			payload: {
+				show: true,
+				title: 'Convert Legacy Decks',
+				description: conversionCount
+					? `Converted ${conversionCount} decks!`
+					: `No decks to convert!`,
+				image: `/images/card-icon.png`,
+			},
+		})
 	}
 
 	// TODO: Convert to component
@@ -357,7 +396,6 @@ const Deck = ({setMenuSection}: Props) => {
 										)}
 									>
 										{loadedDeck.cards.length}/42
-										{/* <span>Cards</span> */}
 									</p>
 									<div className={css.cardCount}>
 										<p className={css.common}>
@@ -378,19 +416,21 @@ const Deck = ({setMenuSection}: Props) => {
 							<Button
 								variant="default"
 								size="small"
-								onClick={() => editDeck()}
+								onClick={() => setMode('edit')}
 								leftSlot={<EditIcon />}
 							>
 								Edit Deck
 							</Button>
-							<Button
-								variant="error"
-								size="small"
-								leftSlot={<DeleteIcon />}
-								onClick={() => setShowDeleteDeckModal(true)}
-							>
-								Delete Deck
-							</Button>
+							{loadedDeck.name !== 'Default' && (
+								<Button
+									variant="error"
+									size="small"
+									leftSlot={<DeleteIcon />}
+									onClick={() => setShowDeleteDeckModal(true)}
+								>
+									Delete Deck
+								</Button>
+							)}
 						</div>
 						{validationMessage && (
 							<div className={css.validationMessage}>
@@ -399,24 +439,32 @@ const Deck = ({setMenuSection}: Props) => {
 							</div>
 						)}
 
-						<Accordion header={cardGroupHeader('Hermits', hermitCards)}>
+						<Accordion
+							header={cardGroupHeader('Hermits', selectedCards.hermits)}
+						>
 							<CardList
-								cards={sortCards(hermitCards)}
+								cards={sortCards(selectedCards.hermits)}
 								size="small"
 								wrap={true}
 							/>
 						</Accordion>
 
-						<Accordion header={cardGroupHeader('Effects', effectCards)}>
+						<Accordion
+							header={cardGroupHeader('Effects', selectedCards.effects)}
+						>
 							<CardList
-								cards={sortCards(effectCards)}
+								cards={sortCards(selectedCards.effects)}
 								size="small"
 								wrap={true}
 							/>
 						</Accordion>
 
-						<Accordion header={cardGroupHeader('Items', itemCards)}>
-							<CardList cards={sortCards(itemCards)} size="small" wrap={true} />
+						<Accordion header={cardGroupHeader('Items', selectedCards.items)}>
+							<CardList
+								cards={sortCards(selectedCards.items)}
+								size="small"
+								wrap={true}
+							/>
 						</Accordion>
 					</DeckLayout.Main>
 					<DeckLayout.Sidebar
@@ -433,7 +481,7 @@ const Deck = ({setMenuSection}: Props) => {
 						footer={
 							<>
 								<Button.SplitGroup style={{padding: '0.5rem'}}>
-									<Button variant="primary" onClick={createNewDeck}>
+									<Button variant="primary" onClick={() => setMode('create')}>
 										Create New Deck
 									</Button>
 									<Button
@@ -448,6 +496,20 @@ const Deck = ({setMenuSection}: Props) => {
 							</>
 						}
 					>
+						{savedDecks.length < 1 && (
+							<p style={{fontSize: '0.9rem', padding: '0.5rem'}}>
+								Looks like you don't have any decks! Create your own or import
+								one from a friend!
+							</p>
+						)}
+						{getLegacyDecks() === true && (
+							<Button
+								style={{marginInline: 'auto', marginTop: '0.5rem'}}
+								onClick={convertLegacyDecks}
+							>
+								Import Legacy Decks
+							</Button>
+						)}
 						{deckList}
 					</DeckLayout.Sidebar>
 				</DeckLayout>

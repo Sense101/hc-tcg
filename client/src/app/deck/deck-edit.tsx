@@ -92,6 +92,8 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 	const [inputIsFocused, setInputIsFocused] = useState<boolean>(false)
 	const [showOverwriteModal, setShowOverwriteModal] = useState<boolean>(false)
 	const [showUnsavedModal, setShowUnsavedModal] = useState<boolean>(false)
+	const [showDefaultDeckModal, setShowDefaultDeckModal] =
+		useState<boolean>(false)
 
 	const deferredTextQuery = useDeferredValue(textQuery)
 	const deckNameRef = useRef<HTMLInputElement>(null)
@@ -185,6 +187,11 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 		//If deck name is empty, do nothing
 		if (newDeck.name === '') return
 
+		//If editing 'Default' deck, prevent overwriting and create new deck
+		if (newDeck.name === 'Default') {
+			return setShowDefaultDeckModal(true)
+		}
+
 		// Check to see if deck name already exists in Local Storage.
 		//TODO: Can't use includes as it will match partial values in names. Need match to be exact.
 		if (
@@ -238,6 +245,14 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 				title="Leave Editor"
 				description="Changes you have made will not be saved. Are you sure you want to leave?"
 				actionText="Discard"
+			/>
+			<AlertModal
+				setOpen={showDefaultDeckModal}
+				onClose={() => setShowDefaultDeckModal(!showDefaultDeckModal)}
+				action={() => null}
+				title="Default Deck"
+				description="Cannot make changes to the default deck. Choose a new name to save your deck as."
+				actionText="Edit"
 			/>
 			<DeckLayout title={title} back={handleBack}>
 				<DeckLayout.Main
