@@ -125,24 +125,13 @@
 		margin: 0;
 	}
 }
-@media screen and (max-width: 80vh) {
-	.menuButton {
-		margin-bottom: 2vh;
-	}
 
+@media screen and (max-width: 80vh) {
 	.mainButtonContainer {
 		margin-top: 5vh;
 	}
 	.smallButtonContainer {
 		flex-direction: column-reverse;
 		align-items: stretch;
-		margin-top: 2.5vh;
-	}
-	.smallButtonContainer .menuButton {
-		width: 100%;
-		margin: 0 0 2.5vh;
-	}
-	.smallButtonContainer .menuButton:first-of-type {
-		margin: 0;
 	}
 }
