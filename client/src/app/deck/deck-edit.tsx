@@ -283,9 +283,9 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 							/>
 							<div className={css.dynamicSpace} />
 							<Button
-								// className={css.clearFilters}
 								size="small"
 								variant="default"
+								disabled={!textQuery && !rarityQuery && !typeQuery}
 								onClick={clearFilters}
 							>
 								Clear Filter

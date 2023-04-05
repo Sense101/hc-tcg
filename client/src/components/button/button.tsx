@@ -4,7 +4,6 @@ import './button.module.scss'
 import {ReactNode, forwardRef} from 'react'
 import React from 'react'
 
-// interface ButtonT extends React.ComponentPropsWithoutRef<'button'> {
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	ref?: any
 	variant?: 'default' | 'primary' | 'secondary' | 'error' | 'stone'
@@ -28,7 +27,6 @@ const Button = ({
 	onClick,
 	...props
 }: ButtonProps) => {
-	console.log('Button Props:', props)
 	return (
 		<button
 			{...props}
