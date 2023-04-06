@@ -131,14 +131,10 @@ export function getEmptyRow() {
  * @returns {PlayerState}
  */
 export function getPlayerState(player) {
-	player.playerName === 'ImagineFyre'
-		? console.log(player.playerDeck.cards)
-		: null
 	const pack = player.playerDeck.cards.map((cardId) => ({
 		cardId,
 		cardInstance: Math.random() + '_' + Math.random(),
 	}))
-	// console.log(player.playerName, pack)
 
 	// shuffle cards
 	pack.sort(() => 0.5 - Math.random())
