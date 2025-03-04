@@ -74,7 +74,12 @@ const Login = () => {
 						<p>{connectingMessage}</p>
 					</div>
 				) : (
-					<div>
+					<>
+						<h2 className={css.welcome}>Welcome to HC-TCG Online!</h2>
+						<p className={css.welcome}>
+							Play the game that took the hermitcraft community by storm.
+						</p>
+						<p className={css.welcome}>To get started, choose a name:</p>
 						<form
 							className={classNames(
 								css.nameForm,
@@ -100,6 +105,8 @@ const Login = () => {
 								Play
 							</Button>
 						</form>
+						<p className={css.welcome}>OR</p>
+						<p className={css.welcome}>If you already have an account:</p>
 						<div
 							className={classNames(
 								css.syncContainer,
@@ -113,7 +120,7 @@ const Login = () => {
 									setSyncing(true)
 								}}
 							>
-								Or Sync Device
+								Sync Account
 							</Button>
 						</div>
 						<div className={classNames(css.syncing, syncing && css.selected)}>
@@ -167,7 +174,7 @@ const Login = () => {
 								</div>
 							</form>
 						</div>
-					</div>
+					</>
 				)}
 				{errorType && <ErrorBanner>{getLoginError(errorType)}</ErrorBanner>}
 				<VersionLinks />
